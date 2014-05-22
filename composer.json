@@ -1,0 +1,25 @@
+{
+    "name": "BrownPaperTickets/BptAPI",
+    "description": "Methods ",
+    "keywords": [
+        "BrownPaperTickets",
+        "package"
+    ],
+    "homepage": "https://github.com/brownpapertickets/bptAPI",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chandler Blum",
+            "email": "chandlerblum@gmail.com",
+            "homepage": "http://www.brownpapertickets.com",
+            "role": "Developer"
+        }
+    ],
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-0": {
+            "BrownPaperTickets": ["src"]
+        }
+    }
+}
