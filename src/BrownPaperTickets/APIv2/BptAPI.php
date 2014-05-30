@@ -205,7 +205,7 @@ class BptAPI
     public function checkDateFormat($date)
     {
         $format = 'M-d-Y h:i';
-        echo $date;
+
         $d = DateTime::createFromFormat($format, $date);
 
         return $d && $d->format($format) == $date;

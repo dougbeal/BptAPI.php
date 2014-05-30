@@ -32,17 +32,17 @@ class AccountInfo extends BptAPI
         }
 
         $account = array(
-            'id' => $accountXML->client_id,
-            'name' => $accountXML->c_client_name,
-            'firstName' => $accountXML->c_fname,
-            'lastName' => $accountXML->c_lname,
-            'address' => $accountXML->c_address,
-            'city' => $accountXML->c_city,
-            'state' => $accountXML->c_state,
-            'zip' => $accountXML->c_zip,
-            'phone' => $accountXML->c_phone,
-            'email' => $accountXML->c_email,
-            'nameForChecks' => $accountXML->c_name_for_checks
+            'id' => (integer) $accountXML->client_id,
+            'name' => (string) $accountXML->c_client_name,
+            'firstName' => (string) $accountXML->c_fname,
+            'lastName' => (string) $accountXML->c_lname,
+            'address' => (string) $accountXML->c_address,
+            'city' => (string) $accountXML->c_city,
+            'state' => (string) $accountXML->c_state,
+            'zip' => (string) $accountXML->c_zip,
+            'phone' => (string) $accountXML->c_phone,
+            'email' => (string) $accountXML->c_email,
+            'nameForChecks' => (string) $accountXML->c_name_for_checks
         );
 
         return $account;
