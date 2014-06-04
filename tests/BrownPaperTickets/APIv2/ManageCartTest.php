@@ -92,7 +92,7 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
             'cartID' => $this->cartID,
             'shippingFirstName' => 'Chandler',
             'shippingLastName' => 'Blum',
-            'shippingAddress' => '5810 8th Ave NW',
+            'shippingAddress' => '124 PHP',
             'shippingCity' => 'Seattle',
             'shippingState' => 'WA',
             'shippingZip' => '98107',
@@ -100,13 +100,13 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
         );
 
         $shippingInfo = $this->bpt->addShippingInfoToCart($params);
-        print_r($shippingInfo);
+
         $this->assertArrayHasKey('result', $shippingInfo);
         $this->assertArrayHasKey('message', $shippingInfo);
         $this->assertArrayHasKey('cartID', $shippingInfo);
 
-        $this->assertContains('success', $shippingInfo['result']);
-        $this->assertContains('Shipping method has been added', $shippingInfo['message']);
+        $this->assertEquals('success', $shippingInfo['result']);
+        $this->assertEquals('Shipping method has been added.', $shippingInfo['message']);
         $this->assertContains($this->cartID, $shippingInfo['cartID']);
 
         $params = array(
@@ -130,8 +130,10 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
         $billingInfo = $this->bpt->addBillingInfoToCart($params);
 
         $this->assertArrayHasKey('result', $billingInfo);
+        $this->assertEquals('success', $billingInfo['result']);
         $this->assertArrayHasKey('message', $billingInfo);
-        $this->assertArrayHasKey('cartID', $this->cartID);
+        $this->assertEquals('Purchase complete.', $billingInfo['message']);
+        $this->assertArrayHasKey('cartID', $billingInfo);
 
     }
 

@@ -7,21 +7,18 @@ use PHPUnit_Framework_TestCase;
 class BrownPaperTicketsCreateEventTest extends \PHPUnit_Framework_TestCase
 {
 
-    /**
-     * Test that true does in fact equal true
-     */
 
     public function __construct()
     {
-        $this->bptApi = new BptApi('p9ny29gi5h');
+        $this->bptApi = new ManageEvent('p9ny29gi5h');
     }
 
     public function testCreateEvent()
     {
         $bpt = $this->bptApi;
 
-        $eventParams = Array(
-            'name' => 'Test - PHP Create Event',
+        $eventParams = array(
+            'name' => 'Chandler PHP API Wrapper Test - Please Delete',
             'city' => 'Seattle',
             'state' => 'WA',
             'shortDescription' => 'This is a short description.',
@@ -30,6 +27,5 @@ class BrownPaperTicketsCreateEventTest extends \PHPUnit_Framework_TestCase
 
         $createEvent = $bpt->createEvent('chandler_api', $eventParams);
 
-        print_r($createEvent);
     }
 }

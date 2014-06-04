@@ -2,7 +2,7 @@
 
 namespace BrownPaperTickets\APIv2;
 
-class CreateEvent extends BptAPI
+class ManageEvent extends BptAPI
 {
     ///////////////////////////////
     // Create/Manage Event Calls //

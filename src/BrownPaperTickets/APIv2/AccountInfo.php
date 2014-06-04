@@ -4,7 +4,7 @@ namespace BrownPaperTickets\APIv2;
 
 class AccountInfo extends BptAPI
 {
-      ///////////////////////////////
+    ///////////////////////////////
     // Account Information Calls //
     ///////////////////////////////
 

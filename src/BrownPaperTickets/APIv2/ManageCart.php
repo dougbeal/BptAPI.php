@@ -201,8 +201,6 @@ class ManageCart extends BptAPI
         $apiResponse = $this->callAPI($apiOptions);
 
         $billingInfoXML = $this->parseXML($apiResponse);
-        
-        print_r($billingInfoXML);
 
         if (isset($billingInfoXML['error'])) {
             return $billingInfoXML;

@@ -15,7 +15,7 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
     public function testGetEvents()
     {
         $events = $this->eventInfo->getEvents('chandler', null, true, true);
-        print_r($events);
+        
         $this->assertCount(4, $events);
 
         foreach ($events as $event) {
@@ -44,6 +44,7 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
             $this->assertInternalType('string', $event['fullDescription']);
 
         }
+
     }
 
     public function testGetSingleEvent()
@@ -89,36 +90,38 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    // public function testGetDates()
-    // {
-    //     $bpt = $this->bptApi;
-    //     $dates = $bpt->getDates(153529);
-    //     $this->assertCount(12, $dates);
+    /*
+    public function testGetDates()
+    {
+        $bpt = $this->bptApi;
+        $dates = $bpt->getDates(153529);
+        $this->assertCount(12, $dates);
 
-    //     foreach ($dates as $date) {
-    //         $this->assertArrayHasKey('id', $date);
-    //         $this->assertArrayHasKey('dateStart', $date);
-    //         $this->assertArrayHasKey('dateEnd', $date);
-    //         $this->assertArrayHasKey('timeStart', $date);
-    //         $this->assertArrayHasKey('timeEnd', $date);
-    //         $this->assertArrayHasKey('live', $date);
-    //         $this->assertArrayHasKey('available', $date);
-    //     }
-    // }
+        foreach ($dates as $date) {
+            $this->assertArrayHasKey('id', $date);
+            $this->assertArrayHasKey('dateStart', $date);
+            $this->assertArrayHasKey('dateEnd', $date);
+            $this->assertArrayHasKey('timeStart', $date);
+            $this->assertArrayHasKey('timeEnd', $date);
+            $this->assertArrayHasKey('live', $date);
+            $this->assertArrayHasKey('available', $date);
+        }
+    }
 
-    // public function testGetPrices()
-    // {
-    //     $bpt = $this->bptApi;
-    //     $prices = $bpt->getPrices(153529, '470049');
-    //     $this->assertCount(6, $prices);
+    public function testGetPrices()
+    {
+        $bpt = $this->bptApi;
+        $prices = $bpt->getPrices(153529, '470049');
+        $this->assertCount(6, $prices);
 
-    //     foreach ($prices as $price) {
-    //         $this->assertArrayHasKey('id', $price);
-    //         $this->assertArrayHasKey('name', $price);
-    //         $this->assertArrayHasKey('value', $price);
-    //         $this->assertArrayHasKey('serviceFee', $price);
-    //         $this->assertArrayHasKey('venueFee', $price);
-    //         $this->assertArrayHasKey('live', $price);
-    //     }
-    // }
+        foreach ($prices as $price) {
+            $this->assertArrayHasKey('id', $price);
+            $this->assertArrayHasKey('name', $price);
+            $this->assertArrayHasKey('value', $price);
+            $this->assertArrayHasKey('serviceFee', $price);
+            $this->assertArrayHasKey('venueFee', $price);
+            $this->assertArrayHasKey('live', $price);
+        }
+    }
+    */
 }
