@@ -4,6 +4,8 @@
 
 * Add Tests
 
+* Semantic Versioning
+
 ## Running Tests
 
 ``` bash

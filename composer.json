@@ -1,11 +1,10 @@
 {
     "name": "BrownPaperTickets/BptAPI",
-    "description": "Methods ",
+    "description": "A library for interacting with the Brown Paper Tickets API",
     "keywords": [
-        "BrownPaperTickets",
-        "package"
+        "Brown Paper Tickets"
     ],
-    "homepage": "https://github.com/brownpapertickets/bptAPI",
+    "homepage": "https://github.com/brownpapertickets/BptAPI.php",
     "license": "MIT",
     "authors": [
         {
@@ -16,6 +15,7 @@
         }
     ],
     "require-dev": {
+
     },
     "autoload": {
         "psr-0": {
