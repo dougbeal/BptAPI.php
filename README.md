@@ -1,5 +1,5 @@
 # Brown Paper Tickets PHP API Wrapper
-
+[![Build Status](https://travis-ci.org/BrownPaperTickets/BptAPI.php.svg?branch=master)](https://travis-ci.org/BrownPaperTickets/BptAPI.php)
 This is a fully rewritten API Wrapper. It adheres to the PSR-02 coding standard.
 
 ## Install
