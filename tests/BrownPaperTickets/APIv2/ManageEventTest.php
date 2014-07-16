@@ -12,22 +12,22 @@ class BrownPaperTicketsCreateEventTest extends \PHPUnit_Framework_TestCase
         $this->bptApi = new ManageEvent('p9ny29gi5h');
     }
 
-    public function testCreateEvent()
-    {
-        $bpt = $this->bptApi;
+    // public function testCreateEvent()
+    // {
+    //     $bpt = $this->bptApi;
 
-        $eventParams = array(
-            'name' => 'Chandler PHP API Wrapper Test - Please Delete',
-            'city' => 'Seattle',
-            'state' => 'WA',
-            'shortDescription' => 'This is a short description.',
-            'fullDescription' => 'This is a Full Description. So long.'
-        );
+    //     $eventParams = array(
+    //         'name' => 'Chandler PHP API Wrapper Test - Please Delete',
+    //         'city' => 'Seattle',
+    //         'state' => 'WA',
+    //         'shortDescription' => 'This is a short description.',
+    //         'fullDescription' => 'This is a Full Description. So long.'
+    //     );
 
-        $createEvent = $bpt->createEvent('chandler_api', $eventParams);
+    //     $createEvent = $bpt->createEvent('chandler_api', $eventParams);
 
-        $this->assertArrayHasKey('id', $createEvent);
-    }
+    //     $this->assertArrayHasKey('id', $createEvent);
+    // }
 
     /**
      * @expectedException        InvalidArgumentException
@@ -84,8 +84,8 @@ class BrownPaperTicketsCreateEventTest extends \PHPUnit_Framework_TestCase
             'zip' => 98102,
             'phone' => '1.800.838.3006',
             'web' => 'http://www.brownpapertickets.com',
-            //'endOfEventMessage' => 'Some message at the end of event',
-            //'endOfSaleMessage' => 'Some end of sale message.',
+            'endOfEventMessage' => 'Some message at the end of event',
+            'endOfSaleMessage' => 'Some end of sale message.',
             'dateNotes' => 'Date Notes',
             'notes' => 'Notes for the event',
             'keywords' => 'Test, API',
@@ -111,8 +111,8 @@ class BrownPaperTicketsCreateEventTest extends \PHPUnit_Framework_TestCase
             'zip' => 98107,
             'phone' => '1-800-838-3006',
             'web' => 'http://www.brownpapertickets.com/event/153529',
-            //'endOfEventMessage' => 'Some NEW message at the end of event',
-            //'endOfSaleMessage' => 'Some NEW end of sale message.',
+            'endOfEventMessage' => 'Some NEW message at the end of event',
+            'endOfSaleMessage' => 'Some NEW end of sale message.',
             'dateNotes' => 'NEW Date Notes',
             'notes' => 'NEW Notes for the event',
             'keywords' => 'NEW, Test, API',
