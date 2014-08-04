@@ -244,10 +244,28 @@ This will return an array with the following fields:
 | `nameForCheck` | String | The name that checks will be made out to. |
 
 ### CartInfo
+Documentation Coming (View Source!)
+
 ### EventInfo
+Documentation Coming (View Source!)
+
 ### ManageCart
+Documentation Coming (View Source!)
+
 ### ManageEvent
+Documentation Coming (View Source!)
+
 ### SalesInfo
+Documentation Coming (View Source!)
+
+
+
+## Changelog
+
+* 8.4.2014 - Cast sales info to proper data types. Added sales test.
+* 6.3.2014 - Cleaned up some of the tests.
+* Fixed some variable name typos. Fixed issue with dates/prices being wrapped in an array when it is already being returned as an array.
+* April 14, 2014: Intitial commit. Due to error, this commit is gone. At this point, most endpoints have been added. Unit test coverages is about 60% I'd say.
 
 ## License
 The MIT License (MIT)
