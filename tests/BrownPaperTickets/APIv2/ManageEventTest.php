@@ -78,7 +78,7 @@ class BrownPaperTicketsCreateEventTest extends \PHPUnit_Framework_TestCase
             'state' => 'WA',
             'shortDescription' => 'Unicorn Origami',
             'fullDescription' => 'I\'ve... seen things you people wouldn\'t believe... [laughs] Attack ships on fire off the shoulder of Orion. I watched c-beams glitter in the dark near the Tannhäuser Gate. All those... moments... will be lost in time, like [coughs] tears... in... rain. Time... to die...
-<img src="http://upload.wikimedia.org/wikipedia/en/1/1f/Tears_In_Rain.png" />',
+<img width="100%" src="http://upload.wikimedia.org/wikipedia/en/1/1f/Tears_In_Rain.png" />',
             'address1' => 'Brown Paper Tickets',
             'address2' => '220 Nickerson St',
             'zip' => 98102,
