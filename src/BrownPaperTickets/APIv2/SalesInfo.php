@@ -179,7 +179,7 @@ class SalesInfo extends BptAPI
                 'creditCard' => (integer) $sale->cc,
                 'shippingMethod' => (string) $sale->shipping_method,
                 'notes' => (string) $sale->order_notes,
-                'ticketNumber' => (integer) $sale->ticket_number,
+                'ticketNumber' => (string) $sale->ticket_number,
                 'section' => (string) $sale->section,
                 'row' => (string) $sale->row,
                 'seat' => (string) $sale->seat
