@@ -67,7 +67,7 @@ class BrownPaperTicketsGetSalesInfoTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(30, $orders);
 
         foreach ($orders as $order) {
-            var_dump($order);
+
             $this->assertArrayHasKey('time', $order);
             $this->assertArrayHasKey('dateID', $order);
             $this->assertArrayHasKey('priceID', $order);
