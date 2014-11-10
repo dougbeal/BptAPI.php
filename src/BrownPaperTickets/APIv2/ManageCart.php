@@ -1,4 +1,31 @@
 <?php
+/**
+ *   Copyright (c) 2014 Brown Paper Tickets
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ *
+ *  @category License
+ *  @package  BptAPI
+ *  @author   Chandler Blum <chandler@brownpapertickets.com>
+ *  @license  GPLv2 <https://www.gnu.org/licenses/gpl-2.0.html>
+ *  @link     Link
+ **/
 
 namespace BrownPaperTickets\APIv2;
 
@@ -33,7 +60,7 @@ class ManageCart extends BptAPI
         return (string) $cartXML->cart_id;
     }
 
-   
+
      /**
      * Add Prices to the cart.
      *
@@ -52,12 +79,12 @@ class ManageCart extends BptAPI
      *                             2 - Will Call
      *                             3 - Print at Home
      * ['quantity'] =>     integer The number of Tickets for this Price
-     * 
+     *
      * affiliateID    integer (optional) An affiliate ID.
      *
      * @return  array Returns either a success or error message array.
      */
-    
+
     public function addPricesToCart($params)
     {
 
@@ -75,11 +102,14 @@ class ManageCart extends BptAPI
 
         $addPrices = array(
             'result' => '',
-            'cartID' => $params['cartID'],
-            'pricesAdded' => array()
+            'cartID' => $params['cartID']
         );
 
         foreach ($params['prices'] as $priceID => $values) {
+
+            if ($values['quantity'] === 0 || $values['quantity'] === '0') {
+                continue;
+            }
 
             $apiOptions['price_id'] = $priceID;
             $apiOptions['shipping'] = $values['shippingMethod'];
@@ -88,41 +118,112 @@ class ManageCart extends BptAPI
             $apiResponse = $this->callAPI($apiOptions);
 
             $addPricesXML = $this->parseXML($apiResponse);
-            
+
             $addSinglePrice = array(
                 'result' => 'success',
                 'priceID' => $priceID,
+                'quantity' => $apiOptions['quantity'],
+                'shipping' => $apiOptions['shipping'],
                 'status' => 'Price has been added.'
             );
 
             if (isset($addPricesXML['error'])) {
-                
+
                 $addPricesError = true;
-
                 $addSinglePrice['result'] = 'fail';
-                
                 $addSinglePrice['status'] = $addPricesXML['error'];
-                
-                unset($addSinglePrice['message']);
-
                 $addPrices['pricesNotAdded'][] = $addSinglePrice;
 
             } else {
 
-                $addPrices['cartValue'] = (integer) $addPricesXML->value;
+                $addPrices['result'] = 'success.';
+                $addPrices['message'] = 'All Prices were added.';
+                $addPrices['cartValue'] = (integer) $addPricesXML->val;
                 $addPrices['pricesAdded'][] = $addSinglePrice;
-                
+
             }
 
         }
 
-        if ($addPricesError == false) {
-
-            $addPrices['result'] = 'fail';
+        if ($addPricesError) {
+            $addPrices['error'] = 'Error';
+            $addPrices['result'] = 'Failed to add prices.';
             $addPrices['message'] = 'Some prices could not be added.';
         }
 
+        if (!isset($addPrices['pricesAdded'])) {
+            $addPrices['result'] = 'Failed to add prices.';
+            $addPrices['message'] = 'No prices were sent with a quantity.';
+        }
+
         return $addPrices;
+    }
+
+    public function removePricesFromCart($params) {
+        $removePricesError = false;
+
+        $apiOptions = array(
+            'endpoint' => 'cart',
+            'stage' => 2,
+            'cart_id' => $params['cartID'],
+        );
+
+        $removePrices = array(
+            'result' => '',
+            'cartID' => $params['cartID']
+        );
+
+        foreach ($params['prices'] as $priceID => $values) {
+
+            if ($values['quantity'] !== 0 || $values['quantity'] !== '0') {
+                continue;
+            }
+
+            $apiOptions['price_id'] = $priceID;
+            $apiOptions['quantity'] = 0;
+
+            $apiResponse = $this->callAPI($apiOptions);
+
+            $removePricesXML = $this->parseXML($apiResponse);
+
+            $removeSinglePrice = array(
+                'result' => 'success',
+                'priceID' => $priceID,
+                'status' => 'Price has been removed.'
+            );
+
+            if (isset($removePricesXML['error'])) {
+
+                $removePricesError = true;
+
+                $removeSinglePrice['result'] = 'fail';
+
+                $removeSinglePrice['status'] = $removePricesXML['error'];
+
+                unset($removeSinglePrice['message']);
+
+                $removePrices['pricesNotRemoved'][] = $removeSinglePrice;
+
+            } else {
+                $removePrices['result'] = 'All prices sent have been removed.';
+                $removePrices['cartValue'] = (integer) $removePricesXML->val;
+                $removePrices['pricesRemoved'][] = $removeSinglePrice;
+            }
+
+        }
+
+        if ($removePricesError) {
+            $removePrices['error'] = 'Error';
+            $removePrices['result'] = 'Failed to remove prices.';
+            $removePrices['message'] = 'Some prices could not be removeed.';
+        }
+
+        if (!isset($removePrices['pricesRemoved'])) {
+            $removePrices['result'] = 'Failed to remove prices.';
+            $removePrices['message'] = 'No prices were sent with a quantity of 0.';
+        }
+
+        return $removePrices;
     }
 
     public function addShippingInfoToCart($params)
@@ -141,7 +242,7 @@ class ManageCart extends BptAPI
             'country' => $params['shippingCountry'],
         );
 
-        if ($this->requireWillCallNames == true
+        if ($this->requireWillCallNames === true
             && (!isset($params['willCallFirstName'])
             || !isset($params['willCallLastName']))
         ) {

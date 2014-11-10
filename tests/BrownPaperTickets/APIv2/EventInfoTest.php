@@ -16,7 +16,7 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
     {
         $events = $this->eventInfo->getEvents('chandler', null, true, true);
         
-        $this->assertCount(4, $events);
+        $this->assertCount(5, $events);
 
         foreach ($events as $event) {
             // Test that we get the proper fields back
@@ -90,11 +90,10 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    /*
+    
     public function testGetDates()
     {
-        $bpt = $this->bptApi;
-        $dates = $bpt->getDates(153529);
+        $dates = $this->eventInfo->getDates(153529);
         $this->assertCount(12, $dates);
 
         foreach ($dates as $date) {
@@ -105,23 +104,10 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
             $this->assertArrayHasKey('timeEnd', $date);
             $this->assertArrayHasKey('live', $date);
             $this->assertArrayHasKey('available', $date);
+
+            if ($date['id'] === 647481) {
+                $this->assertEquals(false, $date['live']);
+            }
         }
     }
-
-    public function testGetPrices()
-    {
-        $bpt = $this->bptApi;
-        $prices = $bpt->getPrices(153529, '470049');
-        $this->assertCount(6, $prices);
-
-        foreach ($prices as $price) {
-            $this->assertArrayHasKey('id', $price);
-            $this->assertArrayHasKey('name', $price);
-            $this->assertArrayHasKey('value', $price);
-            $this->assertArrayHasKey('serviceFee', $price);
-            $this->assertArrayHasKey('venueFee', $price);
-            $this->assertArrayHasKey('live', $price);
-        }
-    }
-    */
 }

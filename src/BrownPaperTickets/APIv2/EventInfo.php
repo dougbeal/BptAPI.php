@@ -1,7 +1,33 @@
 <?php
+/**
+ *   Copyright (c) 2014 Brown Paper Tickets
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ *
+ *  @category License
+ *  @package  BptAPI
+ *  @author   Chandler Blum <chandler@brownpapertickets.com>
+ *  @license  GPLv2 <https://www.gnu.org/licenses/gpl-2.0.html>
+ *  @link     Link
+ **/
 
 namespace BrownPaperTickets\APIv2;
-
 
 class EventInfo extends BptAPI
 {
@@ -30,7 +56,7 @@ class EventInfo extends BptAPI
         if (isset($userName)) {
             $apiOptions['client'] = $userName;
         }
-        
+
         if (isset($eventID)) {
 
             $apiOptions['event_id'] = $eventID;
@@ -123,7 +149,7 @@ class EventInfo extends BptAPI
             );
 
             if ($getPrices === true || $getPrices === 'true') {
-                
+
                 $singleDate['prices'] = $this->getPrices($eventID, $dateID);
             }
 
@@ -191,5 +217,62 @@ class EventInfo extends BptAPI
 
             return $prices;
         }
+    }
+
+    /**
+     * This will return an array with entries for each image attached to an event.
+     * Each entry has the following fields: large, medium, small with urls  to
+     * the corresponding image size.
+     *
+     * @param  integer $eventID The ID of the event you want the images for.
+     * @return array
+     */
+
+    public function getEventImages($eventID)
+    {
+        $ch = curl_init();
+
+        $url = 'https://www.brownpapertickets.com/eventimages.rss?e_number=' . $eventID;
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSLVERSION, 3);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $apiResponse = curl_exec($ch);
+
+        curl_close($ch);
+
+        $xml = $this->parseXML($apiResponse);
+
+        $images = array();
+
+        if (!isset($xml->channel->item)) {
+            return array('error' => 'No images found.');
+        }
+
+
+        foreach ($xml->channel->item as $item) {
+
+            if (isset($item->description)) {
+                $description = (string) $item->description;
+                if ($description === 'The specified event could not be found.') {
+                    return array('error' => 'Invalid event.');
+                }
+            }
+
+            $bpt = $item->children('http://www.brownpapertickets.com/bpt.html');
+
+            $image = array(
+                'large' => ($bpt->image_large ? (string) $bpt->image_large : false),
+                'medium' => ($bpt->image_medium ? (string) $bpt->image_medium : false),
+                'small' => ($bpt->image_small ? (string) $bpt->image_small : false),
+            );
+
+            array_push($images, $image);
+
+        }
+
+        return $images;
     }
 }

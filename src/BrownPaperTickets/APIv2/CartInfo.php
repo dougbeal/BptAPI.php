@@ -54,7 +54,8 @@ class CartInfo extends BptAPI
     /**
      * Get the value of the specified Cart
      * @param  string $cartID The cart ID.
-     * @return [type]         [description]
+     * @return array          An associative array containing the value
+     * of the cart.
      */
     public function getCartValue($cartID)
     {

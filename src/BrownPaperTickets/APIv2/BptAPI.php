@@ -1,6 +1,6 @@
 <?php
 /**
- *   Copyright (c) 2013 Brown Paper Tickets
+ *   Copyright (c) 2014 Brown Paper Tickets
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
  *  @category License
  *  @package  BptAPI
  *  @author   Chandler Blum <chandler@brownpapertickets.com>
- *  @license  GPLv2 <http://www.someurl.com">
+ *  @license  GPLv2 <https://www.gnu.org/licenses/gpl-2.0.html>
  *  @link     Link
  **/
 
@@ -40,7 +40,7 @@ use DateTime;
  *  @category License
  *  @package  BptAPI
  *  @author   Chandler Blum <chandler@brownpapertickets.com>
- *  @license  GPLv2 <http://www.someurl.com">
+ *  @license  GPLv2 <https://www.gnu.org/licenses/gpl-2.0.html>
  *  @link     Link
  */
 class BptAPI

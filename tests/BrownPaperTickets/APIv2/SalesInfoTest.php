@@ -64,7 +64,7 @@ class BrownPaperTicketsGetSalesInfoTest extends \PHPUnit_Framework_TestCase
     {
         $orders = $this->salesInfo->getOrders('chandler_api', 443322);
 
-        $this->assertCount(30, $orders);
+        $this->assertCount(33, $orders);
 
         foreach ($orders as $order) {
 
