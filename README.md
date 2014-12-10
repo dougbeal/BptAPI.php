@@ -4,7 +4,7 @@
 The BptAPI library consists of a set of classes that enable you to easily interact with the [Brown Paper Tickets API](http://www.brownpapertickets.com/apidocs/index.html).
 
 Since this library is still in early development, method names will possibly change.
-See CHANGELOG for more information on any breaking changes.
+See [CHANGELOG](CHANGELOG.MD) for more information on any breaking changes.
 
 ## Usage
 
@@ -298,13 +298,74 @@ Documentation Coming (View Source!)
 Documentation Coming (View Source!)
 
 
+## Latest Changes
 
-## Changelog
+(See [CHANGELOG](CHANGELOG.MD) for full set of changes)
 
-* 8.4.2014 - Cast sales info to proper data types. Added sales test.
-* 6.3.2014 - Cleaned up some of the tests.
-* Fixed some variable name typos. Fixed issue with dates/prices being wrapped in an array when it is already being returned as an array.
-* April 14, 2014: Intitial commit. Due to error, this commit is gone. At this point, most endpoints have been added. Unit test coverages is about 60% I'd say.
+### v0.11
+* __General New Stuff__
+    * **Properties**
+
+        * `errors` - An array of errors.
+
+        * `logErrors` - whether or not to log errors in the array.
+
+    * Added a params array to the `__constuct` function. This is optional. Currently
+    you can use it to set the `logErrors` property e.g. `$params = array('logErrors' => true);`
+
+    * Added a some tests.
+
+* __New Methods__
+    * `setOption($option, $value)` - Set an option. Currently only accepts `'logErrors'`.
+
+    * `getOption($option)` - gets an option. If the option is invalid, it will throw an exception.
+
+    * `setError($methodName, $description)` - Set an error.
+
+    * `getErrors($newest)` - Get the errors array. Pass in `'newest'` to get only
+    the newest error.
+
+* __Breaking Changes__
+    * All arguments for `changeEvent`/`changeDate`/`changePrice` are now passed through
+    an array. You must now include the `username` (no longer camelCase) field in it.
+
+    * __RENAMED METHODS__
+        * `EventInfo->getEventImages()` has been renamed to `EventInfo->getImages()`.
+
+        * `ManageCart->addPricesToCart()` has been renamed to `ManageCart->addPrices()`.
+
+        * `ManageCart->removePricesFromCart()` has been renamed to `ManageCart->removePrices()`.
+
+        * `ManageCart->addShippingInfo()` has been renamed to `ManageCart->addShipping()`.
+
+        * `ManageCart->addBillingInfo()` has been renamed to `ManageCart->addBilling()`.
+
+        * `CartInfo->getCartContents()` has been renamed to `CartInfo->getContents()`.
+
+        * `CartInfo->getCartValue()` has been renamed to `CartInfo->getValue()`.
+
+
+    * Some methods now have different return values. Generally speaking, if an
+    error array was returned before, it will now return `false` and if `logErrors`
+    is true, put the error in the `errors` array.
+
+        * `CartInfo->getContents()` returns info array if successful, false if not.
+
+        * `CartInfo->getValue()` returns info array if successful, false if not.
+
+        * `ManageEvent` the change methods returns true if successful, false if not.
+
+        * `AccountInfo->getAccount()` returns the account info array if successful, false if not.
+
+        * `SalesInfo` methods return info array if successful, false if not.
+
+        * `EventInfo->getImages()` returns false if an error has occured (bad event),
+        null if no images are found or the array of images.
+
+* __Bug Fixes__
+    * `ManageCart->addPrices()` will now skip prices sent with invalid shipping methods.
+    * Fixed parameters on `ManageEvent->createEvent()`/`ManageEvent->changeEvents()`.
+    * Added proper checks for parameters on `ManageEvent->addDate`/`ManageEvent->changeDate` and `ManageEvent->addPrice`/`ManageEvent->changePrice`.
 
 ## License
 The MIT License (MIT)
