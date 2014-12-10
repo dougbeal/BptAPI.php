@@ -4,7 +4,7 @@
 The BptAPI library consists of a set of classes that enable you to easily interact with the [Brown Paper Tickets API](http://www.brownpapertickets.com/apidocs/index.html).
 
 Since this library is still in early development, method names will possibly change.
-See [CHANGELOG](CHANGELOG.MD) for more information on any breaking changes.
+See [CHANGELOG](CHANGELOG.md) for more information on any breaking changes.
 
 ## Usage
 
@@ -300,7 +300,7 @@ Documentation Coming (View Source!)
 
 ## Latest Changes
 
-(See [CHANGELOG](CHANGELOG.MD) for full set of changes)
+(See [CHANGELOG](CHANGELOG.md) for full set of changes)
 
 ### v0.11
 * __General New Stuff__
