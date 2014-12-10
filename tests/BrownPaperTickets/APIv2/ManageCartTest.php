@@ -43,7 +43,7 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
             'prices' => $prices,
         );
 
-        $addPrices = $this->bpt->addPricestoCart($params);
+        $addPrices = $this->bpt->addPrices($params);
 
         // Test that the Cart ID is a value of $addPrices
         // and has this instance's cart ID set.
@@ -99,7 +99,7 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
             'shippingCountry' => 'US'
         );
 
-        $shippingInfo = $this->bpt->addShippingInfoToCart($params);
+        $shippingInfo = $this->bpt->addShipping($params);
 
         $this->assertArrayHasKey('result', $shippingInfo);
         $this->assertArrayHasKey('message', $shippingInfo);
@@ -127,23 +127,44 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
             'phone' => 9784176259
         );
 
-        $billingInfo = $this->bpt->addBillingInfoToCart($params);
+        $billingInfo = $this->bpt->addBilling($params);
 
         $this->assertArrayHasKey('result', $billingInfo);
         $this->assertEquals('success', $billingInfo['result']);
         $this->assertArrayHasKey('message', $billingInfo);
         $this->assertEquals('Purchase complete.', $billingInfo['message']);
         $this->assertArrayHasKey('cartID', $billingInfo);
-
     }
 
-    // public function testSubmitOrderStage3()
-    // {
-    //     $bpt = $this->bptAPI;
+    public function testRemovePrices()
+    {
+        $prices = array(
+            20276327 => array(
+                'quantity' => 1,
+                'shippingMethod' => 2
+            ),
+            2327400 => array(
+                'quantity' => 3,
+                'shippingMethod' => 3
+            )
+        );
 
-    //     $orderParams = array(
-    //         'cartID' => $this->cartID,
-    //         ''
-    //     );
-    // }
+        $cartID = $this->bpt->getCartID();
+        $params = array(
+            'cartID' => $cartID,
+            'prices' => $prices,
+        );
+
+        $this->bpt->addPrices($params);
+
+        $pricesToRemove = array(
+            'cartID' => $cartID,
+            'prices' => array(20276327, 2327400)
+        );
+
+        $removePrices = $this->bpt->removePrices($pricesToRemove);
+
+        $this->assertArrayHasKey('result', $removePrices);
+        $this->assertEquals('All prices sent have been removed.', $removePrices['result']);
+    }
 }

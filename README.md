@@ -1,7 +1,10 @@
 # Brown Paper Tickets PHP API Wrapper
-[![Build Status](https://travis-ci.org/BrownPaperTickets/BptAPI.php.svg?branch=master)](https://travis-ci.org/BrownPaperTickets/BptAPI.php)
+[![Build Status](https://img.shields.io/travis/brownpapertickets/BptAPI.php.svg?style=flat-square)](https://travis-ci.org/brownpapertickets/BptAPI.php)
 
 The BptAPI library consists of a set of classes that enable you to easily interact with the [Brown Paper Tickets API](http://www.brownpapertickets.com/apidocs/index.html).
+
+Since this library is still in early development, method names will possibly change.
+See CHANGELOG for more information on any breaking changes.
 
 ## Usage
 
@@ -10,23 +13,19 @@ After installing the library (either through composer or by dropping the files i
 For Example, to get a listing of events under a specific account, you'd use the [EventInfo](#eventinfo) class.
 
 ```php
-$devID = 'SomeDeveloperID'
-$eventInfo = new EventInfo($devID);
+$eventInfo = new EventInfo('Your Developer ID');
 ```
 
 That will give you access to all of that class' methods.
-
-Most methods require a `$userName` argument. The `$userName` in all cases is the Brown Paper Tickets username of the event producer. Some methods take a couple arguments, some take an array of arguments if the
-number of arguments is over four.
 
 To obtain an array containing all of the producer's events, we'd invoke the `getEvents` method. The get events method takes a total of four arguments:
 
 | Arguments | Type | Required | Description |
 |-----------|------|----------|-------------|
-| $userName | String  | No | The event producer whos events you wish to get |
-| $eventID  | Integer | No | An Event ID if you want to get info on a particular Event |
-| $getDates | Boolean | No | Pass `true` if you want to get a list of dates belonging to the event. Defaults to `false`|
-| $getPrices| Boolean | No | Pass `true` if you want to get a list of prices belogning to each Date. Defaults to `false`|
+| `$username` | String  | No | The event producer whos events you wish to get |
+| `$eventID`  | Integer | No | An Event ID if you want to get info on a particular Event |
+| `$getDates` | Boolean | No | Pass `true` if you want to get a list of dates belonging to the event. Defaults to `false`|
+| `$getPrices`| Boolean | No | Pass `true` if you want to get a list of prices belogning to each Date. Defaults to `false`|
 
 ```php
 $events = $eventInfo->getEvents('some user name' null, true, true);
@@ -221,13 +220,15 @@ The library contains the following classes:
 
 ### AccountInfo
 The AccountInfo class has a single method that will return info about the specified user.
-#### Methods
-##### getAccount
-| Arguments | Description | Authorization |
-|-----------|-------------|---------------|
-|`$userName`  |The user name of the account that you wish to get info on.| Yes |
 
-#### Returns 
+#### getAccount($username)
+Authorization Required: __Yes__
+
+| Arguments | Description | Required |
+|-----------|-------------|---------------|
+|`$username`  |The user name of the account that you wish to get info on.| Yes |
+
+__Returns__ 
 This will return an array with the following fields:
 
 | Field | Type | Description |
@@ -247,7 +248,45 @@ This will return an array with the following fields:
 Documentation Coming (View Source!)
 
 ### EventInfo
-Documentation Coming (View Source!)
+Authorization Required: __No__
+The EventInfo class provides methods that allow you to obtain event data.
+
+#####getEvents
+
+| Arguments | Description | Required | Default | 
+|-----------|-------------|----------|---------|
+| `$username` |The user name of the account that you wish to get info on. If not given, will return a ALL active BPT events and will probably break. | No | `null` |
+| `$eventID` | If passed, will only return the information for that event | No | `null` |
+| `$getDates` | Whether or not to also get a list of dates. | No | `false` |
+| `getPrices` | Whether or not to also get a list of prices. | No | `false` |
+
+__Returns__
+
+This method returns an array of event arrays that contain the following fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | Integer | The event ID. |
+| `title` | string | Title of the Event. |
+| `live` | boolean | Whether or not the event is live. |
+| `address1` | string | Event's address 1. |
+| `address2` | string | Event's address 2. |
+| `city` | string | Event's abbreviated state. | 
+| `zip` | string | Event's zip/postal code. |
+| `shortDescription | string | Event's short description. |
+| `fullDescription | string | Event's full description. |
+| `phone` | string | Event's phone number. |
+| `web` | string | Event's website. |
+| `contactName` | string | Contact's name. |
+| `contactPhone` | string | Contact's phone. |
+| `contactAddress1` | string | Contact's address 1. |
+| `contactAddress2` | string | Contact's address 2. |
+| `contactCity` | string | Contact's city. |
+| `contactState` | string | Contact's state. |
+| `contactCountry` | string | Contact's country. |
+| `contactZip` | string | Contact's zip/postal code. |
+| `contactEmail` | string | Contact's email | 
+
 
 ### ManageCart
 Documentation Coming (View Source!)

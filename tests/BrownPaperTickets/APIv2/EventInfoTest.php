@@ -15,7 +15,7 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
     public function testGetEvents()
     {
         $events = $this->eventInfo->getEvents('chandler', null, true, true);
-        
+
         $this->assertCount(5, $events);
 
         foreach ($events as $event) {
@@ -30,6 +30,17 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
             $this->assertArrayHasKey('zip', $event);
             $this->assertArrayHasKey('shortDescription', $event);
             $this->assertArrayHasKey('fullDescription', $event);
+            $this->assertArrayHasKey('phone', $event);
+            $this->assertArrayHasKey('web', $event);
+            $this->assertArrayHasKey('contactName', $event);
+            $this->assertArrayHasKey('contactPhone', $event);
+            $this->assertArrayHasKey('contactAddress1', $event);
+            $this->assertArrayHasKey('contactAddress2', $event);
+            $this->assertArrayHasKey('contactCity', $event);
+            $this->assertArrayHasKey('contactState', $event);
+            $this->assertArrayHasKey('contactZip', $event);
+            $this->assertArrayHasKey('contactCountry', $event);
+            $this->assertArrayHasKey('contactEmail', $event);
 
             // Test that they return the proper types
             $this->assertInternalType('integer', $event['id']);
@@ -42,6 +53,17 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
             $this->assertInternalType('string', $event['zip']);
             $this->assertInternalType('string', $event['shortDescription']);
             $this->assertInternalType('string', $event['fullDescription']);
+            $this->assertInternalType('string', $event['phone']);
+            $this->assertInternalType('string', $event['web']);
+            $this->assertInternalType('string', $event['contactName']);
+            $this->assertInternalType('string', $event['contactPhone']);
+            $this->assertInternalType('string', $event['contactAddress1']);
+            $this->assertInternalType('string', $event['contactAddress2']);
+            $this->assertInternalType('string', $event['contactCity']);
+            $this->assertInternalType('string', $event['contactState']);
+            $this->assertInternalType('string', $event['contactZip']);
+            $this->assertInternalType('string', $event['contactCountry']);
+            $this->assertInternalType('string', $event['contactEmail']);
 
         }
 
@@ -65,6 +87,17 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('zip', $event[0]);
         $this->assertArrayHasKey('shortDescription', $event[0]);
         $this->assertArrayHasKey('fullDescription', $event[0]);
+        $this->assertArrayHasKey('phone', $event[0]);
+        $this->assertArrayHasKey('web', $event[0]);
+        $this->assertArrayHasKey('contactName', $event[0]);
+        $this->assertArrayHasKey('contactPhone', $event[0]);
+        $this->assertArrayHasKey('contactAddress1', $event[0]);
+        $this->assertArrayHasKey('contactAddress2', $event[0]);
+        $this->assertArrayHasKey('contactCity', $event[0]);
+        $this->assertArrayHasKey('contactState', $event[0]);
+        $this->assertArrayHasKey('contactZip', $event[0]);
+        $this->assertArrayHasKey('contactCountry', $event[0]);
+        $this->assertArrayHasKey('contactEmail', $event[0]);
 
         // Test that they return the proper types
         $this->assertInternalType('integer', $event[0]['id']);
@@ -77,6 +110,17 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('string', $event[0]['zip']);
         $this->assertInternalType('string', $event[0]['shortDescription']);
         $this->assertInternalType('string', $event[0]['fullDescription']);
+        $this->assertInternalType('string', $event[0]['phone']);
+        $this->assertInternalType('string', $event[0]['web']);
+        $this->assertInternalType('string', $event[0]['contactName']);
+        $this->assertInternalType('string', $event[0]['contactPhone']);
+        $this->assertInternalType('string', $event[0]['contactAddress1']);
+        $this->assertInternalType('string', $event[0]['contactAddress2']);
+        $this->assertInternalType('string', $event[0]['contactCity']);
+        $this->assertInternalType('string', $event[0]['contactState']);
+        $this->assertInternalType('string', $event[0]['contactZip']);
+        $this->assertInternalType('string', $event[0]['contactCountry']);
+        $this->assertInternalType('string', $event[0]['contactEmail']);
 
         // Test that we get the expected data
         $this->assertEquals(153529, $event[0]['id']);
@@ -90,7 +134,7 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
 
     }
 
-    
+
     public function testGetDates()
     {
         $dates = $this->eventInfo->getDates(153529);

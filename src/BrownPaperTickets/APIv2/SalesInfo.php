@@ -1,6 +1,8 @@
 <?php
 /**
- *   Copyright (c) 2014 Brown Paper Tickets
+ *  The MIT License (MIT)
+ *
+ *  Copyright (c) 2014 Brown Paper Tickets
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +25,17 @@
  *  @category License
  *  @package  BptAPI
  *  @author   Chandler Blum <chandler@brownpapertickets.com>
- *  @license  GPLv2 <https://www.gnu.org/licenses/gpl-2.0.html>
- *  @link     Link
+ *  @license  MIT <http://mit-license.org/>
+ *  @link     https://github.com/BrownPaperTickets/BptAPI.php
  **/
 
 namespace BrownPaperTickets\APIv2;
 
+
+/**
+ * This class contains the methods used to get sales information about events.
+ * The Developer ID must have the event's owner listed as an authorized account.
+ */
 class SalesInfo extends BptAPI
 {
 
@@ -36,36 +43,34 @@ class SalesInfo extends BptAPI
      * Get the Event Sales info for all events or a specific event,
      * or a specific event's specific date.
      *
-     * @param string  $userName       The Username of the Authorized
-     *                                Account. Required.
+     * __Authorization Required__
+     * 
+     * @param string  $username       The Username of the authorized account. Required.
      * @param string  $eventID        The Event ID. Optional.
      * @param string  $dateID         The Date ID. Optional.
-     * @param boolean $getOnlyCurrent Whether or not to only get
-     *                                sales info for events that
-     *                                are currently on active
+     * @param boolean $getOnlyCurrent Whether or not to only get sales info for events that are currently active. Optional.
      *
      * @return array
      */
     public function getEventSales(
-        $userName,
+        $username,
         $eventID,
         $dateID = '',
         $getOnlyCurrent = false
     ) {
         $apiOptions = array(
             'endpoint' => 'eventsales',
-            'account' => $userName,
+            'account' => $username,
             'event_id' => $eventID,
             'date_id' => $dateID,
             'current' => $getOnlyCurrent
         );
 
-        $apiResults = $this->callAPI($apiOptions);
-
-        $eventSalesXML = $this->parseXML($apiResults);
+        $eventSalesXML = $this->parseXML($this->callAPI($apiOptions));
 
         if (isset($eventSalesXML['error'])) {
-            return $eventSalesXML;
+            $this->setError('getEventSales', $eventSalesXML['error']);
+            return false;
         }
 
         $eventSales = array();
@@ -95,31 +100,31 @@ class SalesInfo extends BptAPI
     /**
      * Get the sales data of a specific date or all dates
      *
-     * @param string $userName The username of the event owner.
-     *                         Required.
+     * __Authorization Required__
+     * 
+     * @param string $username The username of the event owner. Required.
      * @param string $eventID  The Event ID. Required.
      * @param string $dateID   The Price ID. Required.
      *
      * @return [type]
      */
     public function getDateSales(
-        $userName,
+        $username,
         $eventID,
         $dateID = ''
     ) {
         $apiOptions = array(
             'endpoint' => 'datesales',
-            'account' => $userName,
+            'account' => $username,
             'event_id' => $eventID,
             'date_id' => $dateID
         );
 
-        $apiResults = $this->callAPI($apiOptions);
-
-        $dateSalesXML = $this->parseXML($apiResults);
+        $dateSalesXML = $this->parseXML($this->callAPI($apiOptions));
 
         if (isset($dateSalesXML['error'])) {
-            return $dateSalesXML;
+            $this->setError('getDateSales', $dateSalesXML['error']);
+            return false;
         }
 
         $dateSales = array();
@@ -153,36 +158,36 @@ class SalesInfo extends BptAPI
     }
 
     /**
-     * Get Order Info for a Specific Event, Date and Price
+     * Get order info for events or a specific event, date or price
+     * 
+     * __Authorization Required__
+     * 
+     * @param string  $username Your account. It must be in the Authorized Accounts list.
+     * @param integer $eventID  The ID of the Event. Optional.
+     * @param string  $dateID   The ID of the Date. Optional.
+     * @param string  $priceID  The ID of the Price. Optional.
      *
-     * @param string  $userName Your account. It must be in
-     *                          the Authorized Accounts list.
-     * @param integer $eventID  The ID of the Event
-     * @param string  $dateID   The ID of the Date
-     * @param string  $priceID  The ID of the Price
-     *
-     * @return array  $sales   An array of sales information.
+     * @return array|boolean  $sales   An array of sales information or false if unsuccessful.
      */
     public function getOrders(
-        $userName,
+        $username,
         $eventID = '',
         $dateID = '',
         $priceID = ''
     ) {
         $apiOptions = array(
             'endpoint' => 'orderlist',
-            'account' => $userName,
+            'account' => $username,
             'event_id' => $eventID,
             'date_id' => $dateID,
             'price_id' => $priceID
         );
 
-        $apiResults = $this->callAPI($apiOptions);
-
-        $ordersXML = $this->parseXML($apiResults);
+        $ordersXML = $this->parseXML($this->callAPI($apiOptions));
 
         if (isset($ordersXML['error'])) {
-            return $ordersXML;
+            $this->setError('getOrders', $ordersXML['error']);
+            return false;
         }
 
         $orders = array();

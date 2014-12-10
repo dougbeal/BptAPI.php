@@ -1,6 +1,8 @@
 <?php
 /**
- *   Copyright (c) 2014 Brown Paper Tickets
+ *  The MIT License (MIT)
+ *
+ *  Copyright (c) 2014 Brown Paper Tickets
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -23,16 +25,28 @@
  *  @category License
  *  @package  BptAPI
  *  @author   Chandler Blum <chandler@brownpapertickets.com>
- *  @license  GPLv2 <https://www.gnu.org/licenses/gpl-2.0.html>
- *  @link     Link
+ *  @license  MIT <http://mit-license.org/>
+ *  @link     https://github.com/BrownPaperTickets/BptAPI.php
  **/
 
 namespace BrownPaperTickets\APIv2;
 
+/**
+ * This class contains all the methods necessary to purchase tickets through the API.
+ */
 class ManageCart extends BptAPI
 {
 
+    /**
+     * Whether or not to require credit card info.
+     * @var boolean
+     */
     protected $requireCreditCard = false;
+
+    /**
+     * Whether or not to require Will Call names.
+     * @var boolean
+     */
     protected $requireWillCallNames = false;
 
     /**
@@ -49,12 +63,11 @@ class ManageCart extends BptAPI
             'stage' => 1
         );
 
-        $apiResults = $this->callAPI($apiOptions);
-
-        $cartXML = $this->parseXML($apiResults);
+        $cartXML = $this->parseXML($this->callAPI($apiOptions));
 
         if (isset($cartXML['error'])) {
-            return $cartXML;
+            $this->setError('getCartID', $cartXML['error']);
+            return false;
         }
 
         return (string) $cartXML->cart_id;
@@ -63,32 +76,59 @@ class ManageCart extends BptAPI
 
      /**
      * Add Prices to the cart.
+     * @todo Really figure out a decent way of accomplishing this.
      *
-     * @param array $params See Below:
+     * @param array $params An array with all the price info.
+     * 
+     * ### $params array
+     * | parameter | type   | description |
+     * |-----------|--------|-------------|
+     * | `cartID`  | string | The ID of the cart these prices will go into.|
+     * | `prices`  | array  | An array of prices with pricing info. The array key should be the price ID. |
      *
-     * cartID              string   The ID of the cart these prices will go
-     *                              into.
-     * prices              array    An multidimensional array with Price Info
-     *                              PriceID => array(
-     *                                  'shippingMethod' => 1,
-     *                                  'quantity' => Integer
-     *                              );
-     * prices['PriceID'] =>
-     * 'shippingMethod' => integer An integer representing the shipping method
-     *                             1 - Physical Tickets
-     *                             2 - Will Call
-     *                             3 - Print at Home
-     * ['quantity'] =>     integer The number of Tickets for this Price
+     * ### $prices array
+     * | parameter | type | description |
+     * |-----------|------|-------------|
+     * | `shippingMethod` | integer | An integer representing shipping method*
+     * | `quantity` | integer | the number of tickets you wish to add. |
+     * | `affiliateID` | integer | Optional. If you wish to earn a commision, add the affiliate ID. |
      *
-     * affiliateID    integer (optional) An affiliate ID.
      *
+     * __Shipping Method Info__
+     *
+     * 1 - Physical Tickets
+     *
+     * 2 - Will Call
+     *
+     * 3 - Print at Home
+     *
+     * ### Example:
+     * ```
+     * $prices = array(
+     *     '12345' => array(
+     *         'shippingMethod' => 1,
+     *         'quantity' => 2,
+     *     ),
+     *     '12346' => array(
+     *         'shippingMethod' => 3,
+     *         'quantity' => 3
+     *     )
+     * );
+     *
+     * $cart = array(
+     *     'cartID' => 'Some Cart ID string',
+     *     'prices' => $prices;
+     * );
+     * ```
+     * ManageCart->addPricesToCart()
      * @return  array Returns either a success or error message array.
      */
 
-    public function addPricesToCart($params)
+    public function addPrices($params)
     {
 
         $addPricesError = false;
+        $allowedShipping = array(1, 2, 3);
 
         $apiOptions = array(
             'endpoint' => 'cart',
@@ -105,9 +145,23 @@ class ManageCart extends BptAPI
             'cartID' => $params['cartID']
         );
 
+
         foreach ($params['prices'] as $priceID => $values) {
 
             if ($values['quantity'] === 0 || $values['quantity'] === '0') {
+                $addPricesError = true;
+                $addSinglePrice['priceID'] = $priceID;
+                $addSinglePrice['result'] = 'fail';
+                $addSinglePrice['status'] = 'No quantity set';
+                $addPrices['pricesNotAdded'][] = $addSinglePrice;
+                continue;
+            }
+            if (!in_array($values['shippingMethod'], $allowedShipping)) {
+                $addPricesError = true;
+                $addSinglePrice['priceID'] = $priceID;
+                $addSinglePrice['result'] = 'fail';
+                $addSinglePrice['status'] = 'Invalid shipping method.';
+                $addPrices['pricesNotAdded'][] = $addSinglePrice;
                 continue;
             }
 
@@ -115,9 +169,7 @@ class ManageCart extends BptAPI
             $apiOptions['shipping'] = $values['shippingMethod'];
             $apiOptions['quantity'] = $values['quantity'];
 
-            $apiResponse = $this->callAPI($apiOptions);
-
-            $addPricesXML = $this->parseXML($apiResponse);
+            $addPricesXML = $this->parseXML($this->callAPI($apiOptions));
 
             $addSinglePrice = array(
                 'result' => 'success',
@@ -128,14 +180,12 @@ class ManageCart extends BptAPI
             );
 
             if (isset($addPricesXML['error'])) {
-
                 $addPricesError = true;
                 $addSinglePrice['result'] = 'fail';
                 $addSinglePrice['status'] = $addPricesXML['error'];
                 $addPrices['pricesNotAdded'][] = $addSinglePrice;
 
             } else {
-
                 $addPrices['result'] = 'success.';
                 $addPrices['message'] = 'All Prices were added.';
                 $addPrices['cartValue'] = (integer) $addPricesXML->val;
@@ -153,13 +203,25 @@ class ManageCart extends BptAPI
 
         if (!isset($addPrices['pricesAdded'])) {
             $addPrices['result'] = 'Failed to add prices.';
-            $addPrices['message'] = 'No prices were sent with a quantity.';
+            $addPrices['message'] = 'Could not add prices.';
         }
 
         return $addPrices;
     }
 
-    public function removePricesFromCart($params) {
+    /**
+     * Remove prices from a cart.
+     * 
+     * @param  array $params An array containing the cart ID and an array of Prices IDs.
+     * @return array         The results array.
+     *
+     * | parameter | type   | description |
+     * |-----------|--------|-------------|
+     * | cartID    | string | The cart ID |
+     * | prices    | array  | An array of price IDs to be removed |
+     */
+    public function removePrices($params)
+    {
         $removePricesError = false;
 
         $apiOptions = array(
@@ -174,10 +236,6 @@ class ManageCart extends BptAPI
         );
 
         foreach ($params['prices'] as $priceID => $values) {
-
-            if ($values['quantity'] !== 0 || $values['quantity'] !== '0') {
-                continue;
-            }
 
             $apiOptions['price_id'] = $priceID;
             $apiOptions['quantity'] = 0;
@@ -226,7 +284,11 @@ class ManageCart extends BptAPI
         return $removePrices;
     }
 
-    public function addShippingInfoToCart($params)
+    /**
+     * Add shipping info to the cart.
+     * @param array $params The shipping info.
+     */
+    public function addShipping($params)
     {
 
         $apiOptions = array(
@@ -265,7 +327,8 @@ class ManageCart extends BptAPI
         $shippingInfoXML = $this->parseXML($apiResponse);
 
         if (isset($shippingInfoXML['error'])) {
-            return $shippingInfoXML;
+            $this->setError('addShippingInfoToCart', $shippingInfoXML['error']);
+            return false;
         }
 
         $shippingInfo = array(
@@ -277,7 +340,12 @@ class ManageCart extends BptAPI
         return $shippingInfo;
     }
 
-    public function addBillingInfoToCart($params)
+    /**
+     * Add billing info to the cart.
+     * @param array $params The billing info.
+     *
+     */
+    public function addBilling($params)
     {
         $apiOptions = array(
             'endpoint' => 'cart',
@@ -299,12 +367,11 @@ class ManageCart extends BptAPI
             'phone' => $params['phone']
         );
 
-        $apiResponse = $this->callAPI($apiOptions);
-
-        $billingInfoXML = $this->parseXML($apiResponse);
+        $billingInfoXML = $this->parseXML($this->callAPI($apiOptions));
 
         if (isset($billingInfoXML['error'])) {
-            return $billingInfoXML;
+            $this->setError('addBillingInfoToCart', $billingInfoXML['error']);
+            return false;
         }
 
         $billingInfo = array(

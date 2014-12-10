@@ -29,6 +29,10 @@
 
 namespace BrownPaperTickets\APIv2;
 
+/**
+ * This class pulls in info about a particular account.
+ * The account must be listed in the Developer ID's authorized accounts.
+ */
 class AccountInfo extends BptAPI
 {
     ///////////////////////////////
@@ -36,12 +40,12 @@ class AccountInfo extends BptAPI
     ///////////////////////////////
 
     /**
-     * Get the Account information
+     * Get the account information
      *
-     * @param string $username The username of the account
-     *                          must be authorized. Required.
+     * @param string $username The username of the account must be authorized. Required.
      *
-     * @return array
+     * @return array|boolean The account info array if successful, false if not and sets
+     * an error in the error log.
      */
     public function getAccount($username)
     {
@@ -50,12 +54,11 @@ class AccountInfo extends BptAPI
             'account' => $username
         );
 
-        $apiResults = $this->callAPI($apiOptions);
-
-        $accountXML = $this->parseXML($apiResults);
+        $accountXML = $this->parseXML($this->callAPI($apiOptions));
 
         if (isset($accountXML['error'])) {
-            return $accountXML;
+            $this->setError('getAccount', $accountXML['error']);
+            return false;
         }
 
         $account = array(

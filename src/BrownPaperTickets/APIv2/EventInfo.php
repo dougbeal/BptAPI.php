@@ -1,6 +1,8 @@
 <?php
 /**
- *   Copyright (c) 2014 Brown Paper Tickets
+ *  The MIT License (MIT)
+ *
+ *  Copyright (c) 2014 Brown Paper Tickets
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -23,18 +25,21 @@
  *  @category License
  *  @package  BptAPI
  *  @author   Chandler Blum <chandler@brownpapertickets.com>
- *  @license  GPLv2 <https://www.gnu.org/licenses/gpl-2.0.html>
- *  @link     Link
+ *  @license  MIT <http://mit-license.org/>
+ *  @link     https://github.com/BrownPaperTickets/BptAPI.php
  **/
 
 namespace BrownPaperTickets\APIv2;
 
+/**
+ * This class contains all the methods needed to get event information
+ */
 class EventInfo extends BptAPI
 {
     /**
      * Get events.
      *
-     * @param string  $userName  The Brown Paper Tickets username.
+     * @param string  $username  The Brown Paper Tickets username.
      *                           Must be listed in Authorized Accounts
      * @param integer $eventID   Pass in the eventID if you wish to only
      *                           get info for that specific event.
@@ -44,7 +49,7 @@ class EventInfo extends BptAPI
      * @return array  $events An array of events information.
      */
     public function getEvents(
-        $userName = null,
+        $username = null,
         $eventID = null,
         $getDates = false,
         $getPrices = false
@@ -53,8 +58,8 @@ class EventInfo extends BptAPI
             'endpoint' => 'eventlist'
         );
 
-        if (isset($userName)) {
-            $apiOptions['client'] = $userName;
+        if (isset($username)) {
+            $apiOptions['client'] = $username;
         }
 
         if (isset($eventID)) {
@@ -62,23 +67,18 @@ class EventInfo extends BptAPI
             $apiOptions['event_id'] = $eventID;
         }
 
-        $apiResults = $this->callAPI($apiOptions);
-
-        $eventsXML = $this->parseXML($apiResults);
+        $eventsXML = $this->parseXML($this->callAPI($apiOptions));
 
         if (isset($eventsXML['error'])) {
-            $events[] = $eventsXML;
-            return $events;
+            $this->setError('getEvents', $eventsXML['error']);
+            return false;
         }
 
         $events = array();
 
         foreach ($eventsXML->event as $event) {
-
-            $eventID = $event->event_id;
-
             $singleEvent = array(
-                'id'=> (integer) $eventID,
+                'id'=> (integer) $event->event_id,
                 'title'=> (string) $event->title,
                 'live'=> $this->convertToBool($event->live),
                 'address1'=> (string) $event->e_address1,
@@ -87,12 +87,23 @@ class EventInfo extends BptAPI
                 'state'=> (string) $event->e_state,
                 'zip'=> (string) $event->e_zip,
                 'shortDescription'=> (string) $event->description,
-                'fullDescription'=> (string) $event->e_description
+                'fullDescription'=> (string) $event->e_description,
+                'phone' => (string) $event->e_phone,
+                'web' => (string) $event->e_web,
+                'contactName' => (string) $event->c_name,
+                'contactPhone' => (string) $event->c_phone,
+                'contactAddress1' => (string) $event->c_address1,
+                'contactAddress2' => (string) $event->c_address2,
+                'contactCity' => (string) $event->c_city,
+                'contactState' => (string) $event->c_state,
+                'contactCountry' => (string) $event->c_country,
+                'contactZip' => (string) $event->c_zip,
+                'contactEmail' => (string) $event->c_email
             );
 
             if ($getDates === true || $getDates === 'true') {
 
-                $singleEvent['dates'] = $this->getDates($eventID, '', $getPrices);
+                $singleEvent['dates'] = $this->getDates($event->event_id, null, $getPrices);
             }
 
             $events[] = $singleEvent;
@@ -124,12 +135,11 @@ class EventInfo extends BptAPI
             $apiOptions['date_id'] = $dateID;
         }
 
-        $apiResults = $this->callAPI($apiOptions);
-
-        $datesXML = $this->parseXML($apiResults);
+        $datesXML = $this->parseXML($this->callAPI($apiOptions));
 
         if (isset($datesXML['error'])) {
-            return $datesXML;
+            $this->setError('getDates', $datesXML['error']);
+            return false;
         }
 
         $dates = array();
@@ -184,12 +194,11 @@ class EventInfo extends BptAPI
             'date_id' => $dateID
         );
 
-        $apiResults = $this->callAPI($apiOptions);
-
-        $priceXML = $this->parseXML($apiResults);
+        $priceXML = $this->parseXML($this->callAPI($apiOptions));
 
         if (isset($priceXML['error'])) {
-            return $priceXML;
+            $this->setError('getPrices', $priceXML['error']);
+            return false;
         }
 
         $prices = array();
@@ -224,11 +233,11 @@ class EventInfo extends BptAPI
      * Each entry has the following fields: large, medium, small with urls  to
      * the corresponding image size.
      *
-     * @param  integer $eventID The ID of the event you want the images for.
-     * @return array
+     * @param  integer    $eventID The ID of the event you want the images for.
+     * @return array|null An array of image sizes and their URL or null if no images
+     * were found.
      */
-
-    public function getEventImages($eventID)
+    public function getImages($eventID)
     {
         $ch = curl_init();
 
@@ -245,21 +254,15 @@ class EventInfo extends BptAPI
 
         $xml = $this->parseXML($apiResponse);
 
-        $images = array();
+        if (isset($xml->channel->item->title) && $xml->channel->item->title == 'Error') {
 
-        if (!isset($xml->channel->item)) {
-            return array('error' => 'No images found.');
+            $this->setError('getImages', (string) $xml->channel->item->description);
+            return false;
         }
 
+        $images = array();
 
         foreach ($xml->channel->item as $item) {
-
-            if (isset($item->description)) {
-                $description = (string) $item->description;
-                if ($description === 'The specified event could not be found.') {
-                    return array('error' => 'Invalid event.');
-                }
-            }
 
             $bpt = $item->children('http://www.brownpapertickets.com/bpt.html');
 
@@ -269,8 +272,13 @@ class EventInfo extends BptAPI
                 'small' => ($bpt->image_small ? (string) $bpt->image_small : false),
             );
 
-            array_push($images, $image);
+            $images[] = $image;
 
+        }
+
+        if (!$images) {
+            $this->setError('getImages', 'No images found.');
+            return null;
         }
 
         return $images;
