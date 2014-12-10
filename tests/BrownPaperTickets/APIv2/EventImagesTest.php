@@ -47,12 +47,16 @@ class BrownPaperTicketsGetEventImagesTest extends \PHPUnit_Framework_TestCase
 
         $noImages = $this->eventInfo->getImages(900435);
         $this->assertNull($noImages);
-        $this->assertArrayHasKey('getImages', $this->eventInfo->getErrors()[0]);
-        $this->assertEquals('No images found.', $this->eventInfo->getErrors()[0]['getImages']);
+
+        $error = $this->eventInfo->getErrors('newest');
+        $this->assertArrayHasKey('getImages', $error);
+        $this->assertEquals('No images found.', $error['getImages']);
 
         $invalidEvent = $this->eventInfo->getImages(153512);
         $this->assertFalse($invalidEvent);
-        $this->assertArrayHasKey('getImages', $this->eventInfo->getErrors()[0]);
-        $this->assertEquals('The specified event could not be found.', $this->eventInfo->getErrors()[0]['getImages']);
+
+        $error = $this->eventInfo->getErrors('newest');
+        $this->assertArrayHasKey('getImages', $error);
+        $this->assertEquals('The specified event could not be found.', $error['getImages']);
     }
 }

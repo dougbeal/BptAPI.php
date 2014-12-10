@@ -15,26 +15,26 @@ class BrownPaperTicketsCreateEventTest extends \PHPUnit_Framework_TestCase
         $this->bpt->setOption('logErrors', true);
     }
 
-    public function testCreateEvent()
-    {
-        $this->bpt = $this->bpt;
+    // public function testCreateEvent()
+    // {
+    //     $this->bpt = $this->bpt;
 
-        $eventParams = array(
-            'username' => 'chandler_api',
-            'name' => 'Chandler PHP API Wrapper Test - Please Delete',
-            'city' => 'Seattle',
-            'state' => 'WA',
-            'shortDescription' => 'This is a short description.',
-            'fullDescription' => 'This is a Full Description. So long.'
-        );
+    //     $eventParams = array(
+    //         'username' => 'chandler_api',
+    //         'name' => 'Chandler PHP API Wrapper Test - Please Delete',
+    //         'city' => 'Seattle',
+    //         'state' => 'WA',
+    //         'shortDescription' => 'This is a short description.',
+    //         'fullDescription' => 'This is a Full Description. So long.'
+    //     );
 
-        $createEvent = $this->bpt->createEvent($eventParams);
-        $this->assertInternalType('integer', $createEvent);
+    //     $createEvent = $this->bpt->createEvent($eventParams);
+    //     $this->assertInternalType('integer', $createEvent);
 
-        $dateParams = array(
-            'username' => 'chandler_api',
-        );
-    }
+    //     $dateParams = array(
+    //         'username' => 'chandler_api',
+    //     );
+    // }
 
      /**
      * @expectedException        InvalidArgumentException
