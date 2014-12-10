@@ -221,7 +221,7 @@ class BptAPI
         if ($this->logErrors) {
             $this->errors[] = array($method => $description);
 
-            if (array_reverse($this->errors)[0] === array($method => $description)) {
+            if (end($this->errors) === array($method => $description)) {
                 return true;
             } else {
                 return false;
@@ -242,7 +242,7 @@ class BptAPI
     {
         if ($this->logErrors) {
             if ($newest === 'newest') {
-                return array_reverse($this->errors)[0];
+                return end($this->errors);
             }
 
             return array_reverse($this->errors);
