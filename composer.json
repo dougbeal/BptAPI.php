@@ -1,6 +1,5 @@
 {
     "name": "brown-paper-tickets/bpt-api",
-    "version": "0.11",
     "description": "A library for interacting with the Brown Paper Tickets API",
     "keywords": [
         "Brown Paper Tickets"
@@ -15,9 +14,6 @@
             "role": "Developer"
         }
     ],
-    "require-dev": {
-
-    },
     "autoload": {
         "psr-0": {
             "BrownPaperTickets": ["src"]

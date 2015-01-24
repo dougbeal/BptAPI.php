@@ -230,7 +230,7 @@ class EventInfo extends BptAPI
 
     /**
      * This will return an array with entries for each image attached to an event.
-     * Each entry has the following fields: large, medium, small with urls  to
+     * Each entry has the following fields: large, medium, small with urls to
      * the corresponding image size.
      *
      * @param  integer    $eventID The ID of the event you want the images for.
