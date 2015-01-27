@@ -1,14 +1,20 @@
 # Brown Paper Tickets PHP API Wrapper
-[![Build Status](https://img.shields.io/travis/brownpapertickets/BptAPI.php.svg?style=flat-square)](https://travis-ci.org/brownpapertickets/BptAPI.php)
+[![Build Status](https://img.shields.io/travis/brownpapertickets/BptAPI.php.svg?style=flat-square)](https://travis-ci.org/brownpapertickets/BptAPI.php) [![Packagist](https://img.shields.io/packagist/v/brown-paper-tickets/bpt-api.svg?style=flat-square)](https://packagist.org/packages/brown-paper-tickets/bpt-api) [![License MIT](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
 The BptAPI library consists of a set of classes that enable you to easily interact with the [Brown Paper Tickets API](http://www.brownpapertickets.com/apidocs/index.html).
 
 Since this library is still in early development, method names will possibly change.
 See [CHANGELOG](CHANGELOG.md) for more information on any breaking changes.
 
+## Install
+Via Composer:
+`$ composer require brown-paper-tickets/feeds`
+
 ## Usage
 
-After installing the library (either through composer or by dropping the files into your own project), you'll want to first initialize the class that contains the methods you want to use. Everytime you intialize a class, you need to pass in your Brown Paper Tickets Developer ID.
+You'll want to first initialize the class that contains the methods you want to use. The class names mirror the [official API documentation](http://www.brownpapertickets.com/apidocs/index.html). 
+
+So if you were looking to get info on an event's sales, you'd use the `SalesInfo` class. Please note, the methods names are completely different (and hopefully easier to make use of). Every time you intialize a class, you need to pass in your Brown Paper Tickets Developer ID.
 
 For Example, to get a listing of events under a specific account, you'd use the [EventInfo](#eventinfo) class.
 
@@ -22,8 +28,8 @@ To obtain an array containing all of the producer's events, we'd invoke the `get
 
 | Arguments | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `$username` | String  | No | The event producer whos events you wish to get |
-| `$eventID`  | Integer | No | An Event ID if you want to get info on a particular Event |
+| `$username` | String  | No | The event producer whos events you wish to info on. |
+| `$eventID`  | Integer | No | If you only want info on a single event, you can pass in it's ID. |
 | `$getDates` | Boolean | No | Pass `true` if you want to get a list of dates belonging to the event. Defaults to `false`|
 | `$getPrices`| Boolean | No | Pass `true` if you want to get a list of prices belogning to each Date. Defaults to `false`|
 
@@ -289,10 +295,143 @@ This method returns an array of event arrays that contain the following fields:
 
 
 ### ManageCart
-Documentation Coming (View Source!)
 
-### ManageEvent
-Documentation Coming (View Source!)
+Some methods will return a results array with two fields. The first is `success` which is a bolean indicating whether or not it failed and a `message` field explaining why.
+
+#### initCart()
+Starts a new cart session with Brown Paper Tickets.
+
+__Returns__
+The newly created `cartID`. This cart will expire after 15 minutes.
+
+
+#### isExpired()
+Determines whether or not the `cartID` has expired.
+
+#### getCartId()
+
+__Returns__
+The `cartID`.
+
+
+#### setAffiliateID($affiliateID)
+
+Pass your affiliate ID if you want to earn a commission on the sale.
+
+#### setPrices($prices)
+Set the prices to send to the cart. Will return the set prices.
+This does not update the actual cart (use `sendPrices()` for that).
+
+This will throw out any prices with an invalid shipping method and will determine
+whether or not will call names need to be required when adding shipping info.
+
+Pass in an array of prices IDs. Each Price ID value should be set to an array
+with the following fields:
+
+| parameter | type | description |
+|-----------|------|-------------|
+| `shippingMethod` | integer | An integer representing shipping method*
+| `quantity` | integer | the number of tickets you wish to add. |
+| `affiliateID` | integer | Optional. If you wish to earn a commision, add the affiliate ID. |
+
+*Shipping Methods 1 for Physical, 2 for Will Call, 3 for Print at Home.
+
+```php
+$prices = array(
+    '12345' => array(
+        'shippingMethod' => 1,
+        'quantity' => 2,
+    ),
+    '12346' => array(
+        'shippingMethod' => 3,
+        'quantity' => 3
+    )
+);
+```
+
+Returns an array of the set prices.
+
+#### removePrices($prices)
+Pass in an array of price IDs and it will remove the price IDs passed from the set prices. This does not update the actual cart (use `sendPrices()` for that).
+
+__Returns__
+An array of the set prices.
+
+#### sendPrices()
+Send the prices to the cart via the API.
+
+Returns the results array.
+
+#### getPrices()
+Returns the prices set.
+
+#### getValue()
+Returns the current value of the cart as it was set when adding prices.
+Note: When the class sets the value, it will determine whether or not certain fields are required for the billing info. See `setShipping()` for more info.
+
+#### setShipping($shipping)
+Pass in an array of shipping information.
+
+| field | notes |
+|-------|-------|
+| firstName | |
+| lastName | |
+| address | |
+| address2 | |
+| city | |
+| state | |
+| zip | |
+| country | Values include "United States" and "Canada". |
+
+If you have selected tickets that require Will Call names, you can pass in a different name using the `willCallFirstName` and `willCallLastName` fields. Otherwise it will default to using the first and last name fields for will call names.
+
+#### setBilling($billing)
+Pass in an array of billing information.
+
+Always pass these fields:
+
+| field | notes |
+|-------|-------|
+| firstName | |
+| lastName | |
+
+When the cart's value is greather than 0, you must also include the following fields. If you do not, then the cart will return the results array with the message ""
+
+| field | notes |
+|-------|-------|
+| address | |
+| address2 | |
+| city | |
+| state | |
+| zip | |
+| email | |
+| phone | |
+| country | Values include "United States" and "Canada". |
+| type | Credit card type. Must be "Visa", "Mastercard", "Discover" or "Amex" |
+| number | Credit card number. Must be a string |
+| expMonth | Expiration month. |
+| expYear | Expriration year. |
+| cvv2 | Credit card verification code |
+
+Returns a results array.
+
+#### sendBilling()
+Sends the billing information to the cart.
+
+Once this has been called and is successful, you will no longer be able to `sendPrices()`, `sendShipping()` or `sendBilling()`. 
+
+Returns a results array with the following fields:
+
+| field | notes |
+|-------|-------|
+| success | boolean |
+| message | A description of the results |
+| ticketUrl | If successful and this shipping method was chosen, a link to the print-at-home tickets |
+| cartID | the ID of the cart ID |
+| receiptURL | If successful, a URL to the order's receipt on BPT. | 
+
+#### getReceipt()
+Returns the results received by the `sendBilling()` method. 
 
 ### SalesInfo
 Documentation Coming (View Source!)
@@ -302,75 +441,17 @@ Documentation Coming (View Source!)
 
 (See [CHANGELOG](CHANGELOG.md) for full set of changes)
 
-### v0.11
-* __General New Stuff__
-    * **Properties**
+### v0.12
 
-        * `errors` - An array of errors.
-
-        * `logErrors` - whether or not to log errors in the array.
-
-    * Added a params array to the `__constuct` function. This is optional. Currently
-    you can use it to set the `logErrors` property e.g. `$params = array('logErrors' => true);`
-
-    * Added a some tests.
-
-* __New Methods__
-    * `setOption($option, $value)` - Set an option. Currently only accepts `'logErrors'`.
-
-    * `getOption($option)` - gets an option. If the option is invalid, it will throw an exception.
-
-    * `setError($methodName, $description)` - Set an error.
-
-    * `getErrors($newest)` - Get the errors array. Pass in `'newest'` to get only
-    the newest error.
+**The `ManageCart` class has been completely rewritten!**
 
 * __Breaking Changes__
-    * All arguments for `changeEvent`/`changeDate`/`changePrice` are now passed through
-    an array. You must now include the `username` (no longer camelCase) field in it.
-
-    * __RENAMED METHODS__
-        * `EventInfo->getEventImages()` has been renamed to `EventInfo->getImages()`.
-
-        * `ManageCart->addPricesToCart()` has been renamed to `ManageCart->addPrices()`.
-
-        * `ManageCart->removePricesFromCart()` has been renamed to `ManageCart->removePrices()`.
-
-        * `ManageCart->addShippingInfo()` has been renamed to `ManageCart->addShipping()`.
-
-        * `ManageCart->addBillingInfo()` has been renamed to `ManageCart->addBilling()`.
-
-        * `CartInfo->getCartContents()` has been renamed to `CartInfo->getContents()`.
-
-        * `CartInfo->getCartValue()` has been renamed to `CartInfo->getValue()`.
-
-
-    * Some methods now have different return values. Generally speaking, if an
-    error array was returned before, it will now return `false` and if `logErrors`
-    is true, put the error in the `errors` array.
-
-        * `CartInfo->getContents()` returns info array if successful, false if not.
-
-        * `CartInfo->getValue()` returns info array if successful, false if not.
-
-        * `ManageEvent` the change methods returns true if successful, false if not.
-
-        * `AccountInfo->getAccount()` returns the account info array if successful, false if not.
-
-        * `SalesInfo` methods return info array if successful, false if not.
-
-        * `EventInfo->getImages()` returns false if an error has occured (bad event),
-        null if no images are found or the array of images.
-
-* __Bug Fixes__
-    * `ManageCart->addPrices()` will now skip prices sent with invalid shipping methods.
-    * Fixed parameters on `ManageEvent->createEvent()`/`ManageEvent->changeEvents()`.
-    * Added proper checks for parameters on `ManageEvent->addDate`/`ManageEvent->changeDate` and `ManageEvent->addPrice`/`ManageEvent->changePrice`.
-
+    * `ManageCart`
+        * The ManageCart class has been complely rewritten. See [README](README.md#managecart) for new API.
 ## License
 The MIT License (MIT)
 
-Copyright (c) 2014 Brown Paper Tickets
+Copyright (c) 2015 Brown Paper Tickets
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

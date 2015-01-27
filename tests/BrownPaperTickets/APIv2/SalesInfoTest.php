@@ -9,7 +9,7 @@ class BrownPaperTicketsGetSalesInfoTest extends \PHPUnit_Framework_TestCase
 {
     public function __construct()
     {
-        $this->salesInfo = new SalesInfo('p9ny29gi5h');
+        $this->salesInfo = new SalesInfo(getenv('DEVID'));
     }
 
     public function testGetEventSales()

@@ -11,7 +11,7 @@ class BrownPaperTicketsCreateEventTest extends \PHPUnit_Framework_TestCase
 
     public function __construct()
     {
-        $this->bpt = new ManageEvent('p9ny29gi5h');
+        $this->bpt = new ManageEvent(getenv('DEVID'));
         $this->bpt->setOption('logErrors', true);
     }
 

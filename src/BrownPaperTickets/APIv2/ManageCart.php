@@ -36,27 +36,75 @@ namespace BrownPaperTickets\APIv2;
  */
 class ManageCart extends BptAPI
 {
+    private $cartCreatedAt;
+    private $cartTtl = 900;
+    private $cartID;
+
+    private $affiliateID;
+
+    private $prices = array();
+    private $pricesSent = false;
+    private $pricesRemoved = array();
+    private $pricesNotAdded = array();
+
+    private $shippingInfo = array();
+    private $shippingInfoSent = false;
+
+    private $billingInfo = array();
+    private $receipt = array();
+    private $billingInfoSent = false;
+
+    private $allowedShipping = array(1, 2, 3, 4);
+    private $allowedCardTypes = array('Visa', 'Mastercard', 'Amex', 'Discover');
+    private $value = 0;
+
+    private $requireFullBilling = false;
+    private $requireWillCallNames = false;
+
 
     /**
-     * Whether or not to require credit card info.
-     * @var boolean
+     * Tests whether or not the cart ID has expired. If it has, it sets the
+     * cartID to null and returns true. If not, it simply returns false.
+     * @return boolean
      */
-    protected $requireCreditCard = false;
+    public function isExpired()
+    {
+        if ($this->cartCreatedAt + $this->cartTtl < time()) {
+            $this->cartID = null;
+            return true;
+        }
+
+        return false;
+    }
+
+    public function getRequireFullBilling()
+    {
+        return $this->requireFullBilling;
+    }
+
+    public function getRequireWillCallNames()
+    {
+        return $this->requireWillCallNames;
+    }
 
     /**
-     * Whether or not to require Will Call names.
-     * @var boolean
-     */
-    protected $requireWillCallNames = false;
-
-    /**
-     * The first step of the manage cart API calls. Simply returns
-     * a cart ID string.
+     * Gets the cart ID or null if expired.
      *
      * @return string|array The Cart ID or an Array containing
      * the error from the BPT API.
      */
     public function getCartID()
+    {
+        $this->isExpired();
+        return $this->cartID;
+    }
+
+    /**
+     * Initialize a cart ID from the BPT Api.
+     *
+     * @return mixed Error array or a string containing the cart ID..
+     */
+    public function initCart()
     {
         $apiOptions = array(
             'endpoint' => 'cart',
@@ -66,24 +114,32 @@ class ManageCart extends BptAPI
         $cartXML = $this->parseXML($this->callAPI($apiOptions));
 
         if (isset($cartXML['error'])) {
-            $this->setError('getCartID', $cartXML['error']);
+            $this->setError('initCart', $cartXML['error']);
             return false;
         }
 
-        return (string) $cartXML->cart_id;
+        $this->cartCreatedAt = time();
+        $this->cartID = (string) $cartXML->cart_id;
+
+        return $this->cartID;
     }
 
+    public function setAffiliateID($affiliateID)
+    {
+        $this->affiliateID = $affiliateID;
+    }
 
-     /**
-     * Add Prices to the cart.
-     * @todo Really figure out a decent way of accomplishing this.
+    public function getAffiliateID()
+    {
+        return $this->affiliateID;
+    }
+
+    /**
+     * Sets this class's price array.
      *
-     * @param array $params An array with all the price info.
-     * 
-     * ### $params array
-     * | parameter | type   | description |
+     * @param array $prices An array with all the price info.
+     * | parameter | type | description |
      * |-----------|--------|-------------|
-     * | `cartID`  | string | The ID of the cart these prices will go into.|
      * | `prices`  | array  | An array of prices with pricing info. The array key should be the price ID. |
      *
      * ### $prices array
@@ -114,56 +170,104 @@ class ManageCart extends BptAPI
      *         'quantity' => 3
      *     )
      * );
+     */
+
+    public function setPrices($prices)
+    {
+        foreach ($prices as $priceId => $value) {
+            if (!isset($value['shippingMethod']) || !in_array($value['shippingMethod'], $this->allowedShipping)) {
+                unset($prices[$priceId]);
+                continue;
+            }
+
+            if ($value['shippingMethod'] === 2) {
+                $this->requireWillCallNames = true;
+            }
+        }
+
+        $this->prices = $prices;
+
+        return $this->prices;
+    }
+
+    public function getPrices()
+    {
+        return $this->prices;
+    }
+
+    /**
+     * Remove prices. Update the cart after removing prices using sendPrices();
      *
-     * $cart = array(
-     *     'cartID' => 'Some Cart ID string',
-     *     'prices' => $prices;
-     * );
-     * ```
-     * ManageCart->addPricesToCart()
+     * @param  array $params An array containing the cart ID and an array of Prices IDs.
+     * @return array         The results array.
+     *
+     * | parameter | type   | description |
+     * |-----------|--------|-------------|
+     * | prices    | array  | An array of price IDs to be removed |
+     */
+    public function removePrices($prices)
+    {
+
+        $modifiedPrices = $this->getPrices();
+
+        foreach ($prices as $price) {
+            if (isset($modifiedPrices[$price])) {
+
+                $modifiedPrices[$price]['quantity'] = 0;
+
+            }
+        }
+
+        $this->prices = $modifiedPrices;
+
+        return $this->prices;
+    }
+
+    public function getPricesNotAdded()
+    {
+        return $this->pricesNotAdded;
+    }
+
+    public function getPricesRemoved()
+    {
+        return $this->pricesRemoved;
+    }
+
+    /**
+     * Send prices to the cart.
+     * @todo Really figure out a decent way of accomplishing this.
+     *
      * @return  array Returns either a success or error message array.
      */
 
-    public function addPrices($params)
+    public function sendPrices()
     {
+        if ($this->getReceipt()) {
+            return array('success' => false, 'message' => 'Billing info has already been sent.');
+        }
 
-        $addPricesError = false;
-        $allowedShipping = array(1, 2, 3);
+        $cartID = $this->getCartID();
+
+        if (!$cartID) {
+            return array(
+                'success' => false,
+                'message' => 'Invalid cart.'
+            );
+        }
 
         $apiOptions = array(
             'endpoint' => 'cart',
             'stage' => 2,
-            'cart_id' => $params['cartID'],
+            'cart_id' => $this->cartID,
         );
 
-        if (isset($params['affiliateID'])) {
-            $apiOptions['ref'] = $params['affiliateID'];
+        if ($this->affiliateID) {
+            $apiOptions['ref'] = $this->affiliateID;
         }
 
-        $addPrices = array(
-            'result' => '',
-            'cartID' => $params['cartID']
-        );
+        $newPrices = array();
 
-
-        foreach ($params['prices'] as $priceID => $values) {
-
-            if ($values['quantity'] === 0 || $values['quantity'] === '0') {
-                $addPricesError = true;
-                $addSinglePrice['priceID'] = $priceID;
-                $addSinglePrice['result'] = 'fail';
-                $addSinglePrice['status'] = 'No quantity set';
-                $addPrices['pricesNotAdded'][] = $addSinglePrice;
-                continue;
-            }
-            if (!in_array($values['shippingMethod'], $allowedShipping)) {
-                $addPricesError = true;
-                $addSinglePrice['priceID'] = $priceID;
-                $addSinglePrice['result'] = 'fail';
-                $addSinglePrice['status'] = 'Invalid shipping method.';
-                $addPrices['pricesNotAdded'][] = $addSinglePrice;
-                continue;
-            }
+        foreach ($this->getPrices() as $priceID => $values) {
 
             $apiOptions['price_id'] = $priceID;
             $apiOptions['shipping'] = $values['shippingMethod'];
@@ -171,155 +275,124 @@ class ManageCart extends BptAPI
 
             $addPricesXML = $this->parseXML($this->callAPI($apiOptions));
 
-            $addSinglePrice = array(
-                'result' => 'success',
-                'priceID' => $priceID,
-                'quantity' => $apiOptions['quantity'],
-                'shipping' => $apiOptions['shipping'],
-                'status' => 'Price has been added.'
-            );
 
             if (isset($addPricesXML['error'])) {
-                $addPricesError = true;
-                $addSinglePrice['result'] = 'fail';
-                $addSinglePrice['status'] = $addPricesXML['error'];
-                $addPrices['pricesNotAdded'][] = $addSinglePrice;
-
-            } else {
-                $addPrices['result'] = 'success.';
-                $addPrices['message'] = 'All Prices were added.';
-                $addPrices['cartValue'] = (integer) $addPricesXML->val;
-                $addPrices['pricesAdded'][] = $addSinglePrice;
-
+                $this->pricesNotAdded[$priceID] = $addPricesXML['error'];
+                continue;
             }
 
-        }
+            $this->setValue($addPricesXML->val);
 
-        if ($addPricesError) {
-            $addPrices['error'] = 'Error';
-            $addPrices['result'] = 'Failed to add prices.';
-            $addPrices['message'] = 'Some prices could not be added.';
-        }
+            $resultcode = (string) $addPricesXML->resultcode;
 
-        if (!isset($addPrices['pricesAdded'])) {
-            $addPrices['result'] = 'Failed to add prices.';
-            $addPrices['message'] = 'Could not add prices.';
-        }
+            if ($apiOptions['quantity'] === 0 && $resultcode === '000000') {
+                $this->pricesRemoved[] = $priceID;
+                continue;
+            }
 
-        return $addPrices;
-    }
 
-    /**
-     * Remove prices from a cart.
-     * 
-     * @param  array $params An array containing the cart ID and an array of Prices IDs.
-     * @return array         The results array.
-     *
-     * | parameter | type   | description |
-     * |-----------|--------|-------------|
-     * | cartID    | string | The cart ID |
-     * | prices    | array  | An array of price IDs to be removed |
-     */
-    public function removePrices($params)
-    {
-        $removePricesError = false;
-
-        $apiOptions = array(
-            'endpoint' => 'cart',
-            'stage' => 2,
-            'cart_id' => $params['cartID'],
-        );
-
-        $removePrices = array(
-            'result' => '',
-            'cartID' => $params['cartID']
-        );
-
-        foreach ($params['prices'] as $priceID => $values) {
-
-            $apiOptions['price_id'] = $priceID;
-            $apiOptions['quantity'] = 0;
-
-            $apiResponse = $this->callAPI($apiOptions);
-
-            $removePricesXML = $this->parseXML($apiResponse);
-
-            $removeSinglePrice = array(
-                'result' => 'success',
-                'priceID' => $priceID,
-                'status' => 'Price has been removed.'
+            $newPrices[$priceID] = array(
+                'quantity' => $apiOptions['quantity'],
+                'shippingMethod' => $apiOptions['shipping']
             );
 
-            if (isset($removePricesXML['error'])) {
-
-                $removePricesError = true;
-
-                $removeSinglePrice['result'] = 'fail';
-
-                $removeSinglePrice['status'] = $removePricesXML['error'];
-
-                unset($removeSinglePrice['message']);
-
-                $removePrices['pricesNotRemoved'][] = $removeSinglePrice;
-
-            } else {
-                $removePrices['result'] = 'All prices sent have been removed.';
-                $removePrices['cartValue'] = (integer) $removePricesXML->val;
-                $removePrices['pricesRemoved'][] = $removeSinglePrice;
-            }
-
         }
 
-        if ($removePricesError) {
-            $removePrices['error'] = 'Error';
-            $removePrices['result'] = 'Failed to remove prices.';
-            $removePrices['message'] = 'Some prices could not be removeed.';
+        if (!$newPrices && !$this->getPricesRemoved() && $this->getPricesNotAdded()) {
+            return array('success' => false, 'message' => 'Prices were not able to be added.');
         }
 
-        if (!isset($removePrices['pricesRemoved'])) {
-            $removePrices['result'] = 'Failed to remove prices.';
-            $removePrices['message'] = 'No prices were sent with a quantity of 0.';
+        $this->setPrices($newPrices);
+        $this->pricesSent = true;
+
+        return array('success' => true, 'message' => 'Prices sent.');
+    }
+
+    public function setShipping($shippingInfo)
+    {
+        if (!isset($shippingInfo['firstName']) ||
+            !isset($shippingInfo['lastName']) ||
+            !isset($shippingInfo['address']) ||
+            !isset($shippingInfo['city']) ||
+            !isset($shippingInfo['state']) ||
+            !isset($shippingInfo['zip']) ||
+            !isset($shippingInfo['country'])
+        ) {
+            $this->setError('setShipping', 'Missing required Fields.');
+            return false;
         }
 
-        return $removePrices;
+        if ($this->requireWillCallNames === true &&
+            (!isset($shippingInfo['willCallFirstName']) ||
+            !isset($shippingInfo['willCallLastName']))
+        ) {
+            $shippingInfo['willCallFirstName'] = $shippingInfo['firstName'];
+            $shippingInfo['willCallLastName'] = $shippingInfo['lastName'];
+        }
+
+        $this->shippingInfo = $shippingInfo;
+
+        return array('success' => true, 'message' => 'Shipping info set.');
+    }
+
+    public function getShipping()
+    {
+        return $this->shippingInfo;
     }
 
     /**
-     * Add shipping info to the cart.
+     * Send shipping info to the cart.
      * @param array $params The shipping info.
      */
-    public function addShipping($params)
+    public function sendShipping()
     {
+
+        if ($this->getReceipt()) {
+            return array('success' => false, 'message' => 'Billing info has already been sent.');
+        }
+
+        $cartID = $this->getCartID();
+
+        if (!$cartID) {
+            return array(
+                'success' => false,
+                'message' => 'Invalid cart.'
+            );
+        }
+
+        if (!$this->getPrices()) {
+            return array(
+                'success' => false,
+                'message' => 'No tickets.'
+            );
+        }
+
+        if (!$this->pricesSent) {
+            return array(
+                'success' => false,
+                'message' => 'Prices have not been sent.'
+            );
+        }
 
         $apiOptions = array(
             'endpoint' => 'cart',
             'stage' => 3,
-            'cart_id' => $params['cartID'],
-            'fname' => $params['shippingFirstName'],
-            'lname' => $params['shippingLastName'],
-            'address' => $params['shippingAddress'],
-            'city' => $params['shippingCity'],
-            'state' => $params['shippingState'],
-            'zip' => $params['shippingZip'],
-            'country' => $params['shippingCountry'],
+            'cart_id' => $cartID,
+            'fname' => $this->shippingInfo['firstName'],
+            'lname' => $this->shippingInfo['lastName'],
+            'address' => $this->shippingInfo['address'],
+            'city' => $this->shippingInfo['city'],
+            'state' => $this->shippingInfo['state'],
+            'zip' => $this->shippingInfo['zip'],
+            'country' => $this->shippingInfo['country'],
         );
 
-        if ($this->requireWillCallNames === true
-            && (!isset($params['willCallFirstName'])
-            || !isset($params['willCallLastName']))
-        ) {
-
-            return array(
-                'result' => 'error',
-                'message' => 'Will Call names are required.'
-            );
-        }
-        if (isset($params['willCallFirstName'])) {
-            $apiOptions['attendee_firstname'] = $params['willCallFirstName'];
+        if (isset($shippingInfo['willCallFirstName'])) {
+            $apiOptions['attendee_firstname'] = $this->shippingInfo['willCallFirstName'];
         }
 
-        if (isset($params['willCallLastName'])) {
-            $apiOptions['attendee_lastname'] = $params['willCallLastName'];
+        if (isset($shippingInfo['willCallLastName'])) {
+            $apiOptions['attendee_lastname'] = $this->shippingInfo['willCallLastName'];
         }
 
         $apiResponse = $this->callAPI($apiOptions);
@@ -327,17 +400,50 @@ class ManageCart extends BptAPI
         $shippingInfoXML = $this->parseXML($apiResponse);
 
         if (isset($shippingInfoXML['error'])) {
-            $this->setError('addShippingInfoToCart', $shippingInfoXML['error']);
-            return false;
+            return array('success' => false, 'message' => $shippingInfoXML['error']);
         }
 
-        $shippingInfo = array(
-            'result' => (string) 'success',
-            'message' => (string) 'Shipping method has been added.',
-            'cartID' => (string) $params['cartID']
-        );
+        $this->shippingInfoSent = true;
 
-        return $shippingInfo;
+        return true;
+    }
+
+    public function getBilling()
+    {
+        return $this->billingInfo;
+    }
+
+    public function setBilling($billingInfo)
+    {
+
+        if (!isset($billingInfo['firstName']) || !isset($billingInfo['lastName'])) {
+            return array('success' => false, 'message' => 'First and last name are required.');
+        }
+
+        if ($this->getRequireFullBilling()) {
+            if (!isset($billingInfo['email']) || !isset($billingInfo['phone'])) {
+                return array('success' => false, 'message' => 'Email and telephone are required.');
+            }
+
+            if (!isset($billingInfo['type']) ||
+                !isset($billingInfo['number']) ||
+                !isset($billingInfo['expMonth']) ||
+                !isset($billingInfo['expYear']) ||
+                !isset($billingInfo['cvv2'])
+            ) {
+                return array('success' => false, 'message' => 'Credit card info is required.');
+            }
+
+
+            if (!in_array($billingInfo['type'], $this->allowedCardTypes)) {
+                return array('success' => false, 'message' => 'Type must be Visa, Mastercard, Discover or Amex.');
+            }
+        }
+
+        $this->billingInfo = $billingInfo;
+
+        return array('success' => true, 'message' => 'Billing info set.');
+
     }
 
     /**
@@ -345,41 +451,141 @@ class ManageCart extends BptAPI
      * @param array $params The billing info.
      *
      */
-    public function addBilling($params)
+    public function sendBilling()
     {
+
+        if ($this->getReceipt()) {
+            return array('success' => false, 'message' => 'Billing info has already been sent.');
+        }
+
+        $cartID = $this->getCartID();
+
+        if (!$cartID) {
+            return array(
+                'success' => false,
+                'message' => 'Invalid cart.'
+            );
+        }
+
+        if (!$this->getPrices()) {
+            return array(
+                'success' => false,
+                'message' => 'No prices set.'
+            );
+        }
+
+        if (!$this->pricesSent) {
+            return array(
+                'success' => false,
+                'message' => 'Prices have not been sent.'
+            );
+        }
+
+        if (!$this->getShipping()) {
+            return array(
+                'success' => false,
+                'message' => 'No shipping info set.'
+            );
+        }
+
+        if (!$this->shippingInfoSent) {
+            return array(
+                'success' => false,
+                'message' => 'Shipping info has not been sent.'
+            );
+        }
+
+        if (!$this->getBilling()) {
+            return array(
+                'success' => false,
+                'message' => 'No billing info set.'
+            );
+        }
+
         $apiOptions = array(
             'endpoint' => 'cart',
             'stage' => 4,
-            'cart_id' => $params['cartID'],
-            'type' => $params['ccType'],
-            'number' => $params['ccNumber'],
-            'exp_month' => $params['ccExpMonth'],
-            'exp_year' => $params['ccExpYear'],
-            'cvv2' => $params['ccCvv2'],
-            'billing_fname' => $params['billingFirstName'],
-            'billing_lname' => $params['billingLastName'],
-            'billing_address' => $params['billingAddress'],
-            'billing_city' => $params['billingCity'],
-            'billing_state' => $params['billingState'],
-            'billing_zip' => $params['billingZip'],
-            'billing_country' => $params['billingCountry'],
-            'email' => $params['email'],
-            'phone' => $params['phone']
+            'cart_id' => $cartID,
+            'billing_fname' => $this->billingInfo['firstName'],
+            'billing_lname' => $this->billingInfo['lastName'],
         );
 
-        $billingInfoXML = $this->parseXML($this->callAPI($apiOptions));
-
-        if (isset($billingInfoXML['error'])) {
-            $this->setError('addBillingInfoToCart', $billingInfoXML['error']);
-            return false;
+        if ($this->requireFullBilling) {
+            $apiOptions['type'] = $this->billingInfo['type'];
+            $apiOptions['number'] = $this->billingInfo['number'];
+            $apiOptions['exp_month'] = $this->billingInfo['expMonth'];
+            $apiOptions['exp_year'] = $this->billingInfo['expYear'];
+            $apiOptions['cvv2'] = $this->billingInfo['cvv2'];
+            $apiOptions['billing_address'] = $this->billingInfo['address'];
+            $apiOptions['billing_city'] = $this->billingInfo['city'];
+            $apiOptions['billing_state'] = $this->billingInfo['state'];
+            $apiOptions['billing_zip'] = $this->billingInfo['zip'];
+            $apiOptions['billing_country'] = $this->billingInfo['country'];
+            $apiOptions['email'] = $this->billingInfo['email'];
+            $apiOptions['phone'] = $this->billingInfo['phone'];
         }
 
-        $billingInfo = array(
-            'result' => (string) 'success',
-            'message' => (string) 'Purchase complete.',
-            'cartID' => (string) $billingInfoXML->cart_id
+        $billingInfoXML = $this->parseXML($this->callAPI($apiOptions));
+        if (isset($billingInfoXML['error'])) {
+             return array('success' => false, 'message' => $billingInfoXML['error']);
+        }
+
+        $results = array(
+            'success' => true,
+            'message' => 'Purchase complete.',
         );
 
-        return $billingInfo;
+        if ($billingInfoXML->pahurl) {
+            $results['pahurl'] = (string) $billingInfoXML->pahurl;
+        }
+
+        $this->billingInfoSent = true;
+        $this->setReceipt($results);
+        return $results + $this->getReceipt();
+    }
+
+    public function getReceipt()
+    {
+        return $this->receipt;
+    }
+
+    private function setReceipt($receipt)
+    {
+        if (isset($receipt['success'])) {
+            unset($receipt['success']);
+        }
+
+        if (isset($receipt['message'])) {
+            unset($receipt['message']);
+        }
+
+        if ($receipt['pahurl']) {
+            $receipt['ticketURL'] = $receipt['pahurl'];
+        }
+
+        $receipt['cartID'] = $this->getCartID();
+        $receipt['total'] = $this->getValue();
+        $receipt['receiptURL'] = 'https://www.brownpapertickets.com/confirmation/' . $this->getCartID();
+
+        $this->receipt = $receipt;
+    }
+
+    private function setValue($value)
+    {
+        $value = (real) $value;
+        if ($value === 0) {
+            $this->requireFullBilling = false;
+        }
+
+        if ($value > 0) {
+            $this->requireFullBilling = true;
+        }
+
+        $this->value = $value;
+    }
+
+    public function getValue()
+    {
+        return $this->value;
     }
 }

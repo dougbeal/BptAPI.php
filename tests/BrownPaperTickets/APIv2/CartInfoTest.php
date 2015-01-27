@@ -12,7 +12,7 @@ class BrownPaperTicketsGetCartContentsTest extends \PHPUnit_Framework_TestCase
 
     public function __construct()
     {
-        $this->bpt = new CartInfo('p9ny29gi5h');
+        $this->bpt = new CartInfo(getenv('DEVID'));
 
     }
 

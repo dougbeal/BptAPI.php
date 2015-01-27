@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.12
+
+**The `ManageCart` class has been completely rewritten!**
+
+* __General Fixes__
+    * Removed unnecessary type casting in `ManageCart`.
+
+* __Breaking Changes__
+    * `ManageCart`
+        * The ManageCart class has been complely rewritten. See [README](README.md#managecart) for new API.
+
 ## v0.11
 * __General New Stuff__
     * **Properties**
