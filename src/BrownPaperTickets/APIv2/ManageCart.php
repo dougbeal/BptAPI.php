@@ -61,6 +61,52 @@ class ManageCart extends BptAPI
     private $requireFullBilling = false;
     private $requireWillCallNames = false;
 
+    /**
+     * Initialize a cart ID from the BPT Api or pass in an existing cart and created at time.
+     *
+     * @param  string $cartID The existing cart ID.
+     * @param  integer $cartCreatedAt The time the cart was created at.
+     * @return mixed Error array or a string containing the cart ID.
+     */
+    public function initCart($cartID = null, $createdAt = null)
+    {
+
+        if ($cartID) {
+
+            $this->cartID = $cartID;
+            $this->createdAt = $createdAt;
+
+            if ($this->isExpired()) {
+                return array('success' => false, 'message' => 'Cart has expired.');
+            }
+        }
+
+        if (!$cartID) {
+            $apiOptions = array(
+                'endpoint' => 'cart',
+                'stage' => 1
+            );
+
+            $cartXML = $this->parseXML($this->callAPI($apiOptions));
+
+            if (isset($cartXML['error'])) {
+                $this->setError('initCart', $cartXML['error']);
+                return false;
+            }
+
+            $this->cartID = (string) $cartXML->cart_id;
+            $this->cartCreatedAt = time();
+        }
+
+
+        return array('success' => true, 'cartID' => $this->cartID, 'cartCreatedAt' => $this->cartCreatedAt);
+    }
+
+    public function existingCart($cartID = null, $cartCreatedAt = null)
+    {
+        $this->cartId = $cartID;
+        $this->cartCreatedAt = $cartCreatedAt;
+    }
 
     /**
      * Tests whether or not the cart ID has expired. If it has, it sets the
@@ -99,29 +145,9 @@ class ManageCart extends BptAPI
         return $this->cartID;
     }
 
-    /**
-     * Initialize a cart ID from the BPT Api.
-     *
-     * @return mixed Error array or a string containing the cart ID..
-     */
-    public function initCart()
+    public function getCartCreatedAt()
     {
-        $apiOptions = array(
-            'endpoint' => 'cart',
-            'stage' => 1
-        );
-
-        $cartXML = $this->parseXML($this->callAPI($apiOptions));
-
-        if (isset($cartXML['error'])) {
-            $this->setError('initCart', $cartXML['error']);
-            return false;
-        }
-
-        $this->cartCreatedAt = time();
-        $this->cartID = (string) $cartXML->cart_id;
-
-        return $this->cartID;
+        return $this->cartCreatedAt;
     }
 
     public function setAffiliateID($affiliateID)

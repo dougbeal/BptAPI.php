@@ -22,7 +22,16 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
     public function testGetCartId()
     {
         $this->assertInternalType('null', $this->bpt->getCartID());
-        $this->assertInternalType('string', $this->bpt->initCart());
+        $this->assertInternalType('null', $this->bpt->getCartCreatedAt());
+
+        $initCart = $this->bpt->initCart();
+
+        $this->assertInternalType('string', $this->bpt->getCartID());
+        $this->assertInternalType('integer', $this->bpt->getCartCreatedAt());
+
+        $this->assertInternalType('array', $initCart);
+        $this->assertArrayHasKey('cartID', $initCart);
+        $this->assertArrayHasKey('cartCreatedAt', $initCart);
     }
 
     public function testSetPricesAndRequirements()
@@ -397,6 +406,14 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('receiptURL', $receipt);
         $this->assertArrayHasKey('total', $receipt);
         $this->assertArrayHasKey('cartID', $receipt);
+    }
 
+    public function testPassCartID()
+    {
+        $fail = $this->bpt->initCart('z6UDpmZQbAzzrQRk6f5wzi4TH', 1422474020);
+
+        $this->assertInternalType('array', $fail);
+        $this->assertFalse($fail['success']);
+        $this->assertEquals('Cart has expired.', $fail['message']);
     }
 }

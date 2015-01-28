@@ -1,4 +1,4 @@
-# Brown Paper Tickets PHP API Wrapper
+# Brown Paper Tickets PHP API
 [![Build Status](https://img.shields.io/travis/brownpapertickets/BptAPI.php.svg?style=flat-square)](https://travis-ci.org/brownpapertickets/BptAPI.php) [![Packagist](https://img.shields.io/packagist/v/brown-paper-tickets/bpt-api.svg?style=flat-square)](https://packagist.org/packages/brown-paper-tickets/bpt-api) [![License MIT](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
 The BptAPI library consists of a set of classes that enable you to easily interact with the [Brown Paper Tickets API](http://www.brownpapertickets.com/apidocs/index.html).
@@ -8,7 +8,7 @@ See [CHANGELOG](CHANGELOG.md) for more information on any breaking changes.
 
 ## Install
 Via Composer:
-`$ composer require brown-paper-tickets/feeds`
+`$ composer require brown-paper-tickets/bpt-api`
 
 ## Usage
 
@@ -298,8 +298,10 @@ This method returns an array of event arrays that contain the following fields:
 
 Some methods will return a results array with two fields. The first is `success` which is a bolean indicating whether or not it failed and a `message` field explaining why.
 
-#### initCart()
-Starts a new cart session with Brown Paper Tickets.
+#### initCart($cartID = null, $createdAt = null)
+Starts a new cart session with Brown Paper Tickets. You can also pass in an existing `cartID` and the time it was `createdAt`. If the cart has expired it will return a results array with `success` set to `false`.
+
+If successful, it will return a results array with `success` set to `true` as well as a `cartID` and `cartCreatedAt` field.
 
 __Returns__
 The newly created `cartID`. This cart will expire after 15 minutes.

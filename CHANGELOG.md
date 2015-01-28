@@ -1,6 +1,10 @@
 # Changelog
 
-## v0.12
+## v0.13.1
+
+* `ManageCart->initCart()` will now accept two arguments. `cartID` and `cartCreatedAt`.
+
+## v0.13
 
 **The `ManageCart` class has been completely rewritten!**
 
