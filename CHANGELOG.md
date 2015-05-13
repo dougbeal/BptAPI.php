@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.14.2
+
+* Fixed issue with the order field in getPrices.
+
 ## v0.14.1
 
 * Fixed issue that caused the API to reject requests.
