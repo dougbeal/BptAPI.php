@@ -191,7 +191,9 @@ class EventInfo extends BptAPI
         $apiOptions = array(
             'endpoint' => 'pricelist',
             'event_id' => $eventID,
-            'date_id' => $dateID
+            'date_id' => $dateID,
+            'show_order' => true,
+            'includepassword' => 1,
         );
 
         $priceXML = $this->parseXML($this->callAPI($apiOptions));
@@ -212,6 +214,8 @@ class EventInfo extends BptAPI
                 'serviceFee'=> (float) $price->service_fee,
                 'venueFee'=> (float) $price->venue_fee,
                 'live'=> (boolean) $this->convertToBool($price->live),
+                'order' => (integer) ($price->order ? $this->order : 1),
+                'password' => (string) $price->password,
             );
 
             $prices[] = $single_price;

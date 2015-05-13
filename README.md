@@ -12,7 +12,7 @@ Via Composer:
 
 ## Usage
 
-You'll want to first initialize the class that contains the methods you want to use. The class names mirror the [official API documentation](http://www.brownpapertickets.com/apidocs/index.html). 
+You'll want to first initialize the class that contains the methods you want to use. The class names mirror the [official API documentation](http://www.brownpapertickets.com/apidocs/index.html).
 
 So if you were looking to get info on an event's sales, you'd use the `SalesInfo` class. Please note, the methods names are completely different (and hopefully easier to make use of). Every time you intialize a class, you need to pass in your Brown Paper Tickets Developer ID.
 
@@ -110,7 +110,7 @@ Use the Full Description to describe your event as completely as possible. It's 
                         [dateEnd] => 2016-12-13
                         [timeStart] => 14:00
                         [timeEnd] => 17:00
-                        [live] => 
+                        [live] =>
                         [available] => 10000
                         [prices] => Array
                             (
@@ -121,7 +121,7 @@ Use the Full Description to describe your event as completely as possible. It's 
                                         [value] => 25
                                         [serviceFee] => 1.87
                                         [venueFee] => 0
-                                        [live] => 
+                                        [live] =>
                                     )
 
                             )
@@ -234,7 +234,7 @@ Authorization Required: __Yes__
 |-----------|-------------|---------------|
 |`$username`  |The user name of the account that you wish to get info on.| Yes |
 
-__Returns__ 
+__Returns__
 This will return an array with the following fields:
 
 | Field | Type | Description |
@@ -259,7 +259,7 @@ The EventInfo class provides methods that allow you to obtain event data.
 
 #####getEvents
 
-| Arguments | Description | Required | Default | 
+| Arguments | Description | Required | Default |
 |-----------|-------------|----------|---------|
 | `$username` |The user name of the account that you wish to get info on. If not given, will return a ALL active BPT events and will probably break. | No | `null` |
 | `$eventID` | If passed, will only return the information for that event | No | `null` |
@@ -277,7 +277,7 @@ This method returns an array of event arrays that contain the following fields:
 | `live` | boolean | Whether or not the event is live. |
 | `address1` | string | Event's address 1. |
 | `address2` | string | Event's address 2. |
-| `city` | string | Event's abbreviated state. | 
+| `city` | string | Event's abbreviated state. |
 | `zip` | string | Event's zip/postal code. |
 | `shortDescription | string | Event's short description. |
 | `fullDescription | string | Event's full description. |
@@ -291,7 +291,7 @@ This method returns an array of event arrays that contain the following fields:
 | `contactState` | string | Contact's state. |
 | `contactCountry` | string | Contact's country. |
 | `contactZip` | string | Contact's zip/postal code. |
-| `contactEmail` | string | Contact's email | 
+| `contactEmail` | string | Contact's email |
 
 
 ### ManageCart
@@ -420,7 +420,7 @@ Returns a results array.
 #### sendBilling()
 Sends the billing information to the cart.
 
-Once this has been called and is successful, you will no longer be able to `sendPrices()`, `sendShipping()` or `sendBilling()`. 
+Once this has been called and is successful, you will no longer be able to `sendPrices()`, `sendShipping()` or `sendBilling()`.
 
 Returns a results array with the following fields:
 
@@ -430,10 +430,10 @@ Returns a results array with the following fields:
 | message | A description of the results |
 | ticketUrl | If successful and this shipping method was chosen, a link to the print-at-home tickets |
 | cartID | the ID of the cart ID |
-| receiptURL | If successful, a URL to the order's receipt on BPT. | 
+| receiptURL | If successful, a URL to the order's receipt on BPT. |
 
 #### getReceipt()
-Returns the results received by the `sendBilling()` method. 
+Returns the results received by the `sendBilling()` method.
 
 ### SalesInfo
 Documentation Coming (View Source!)
@@ -442,14 +442,10 @@ Documentation Coming (View Source!)
 ## Latest Changes
 
 (See [CHANGELOG](CHANGELOG.md) for full set of changes)
+### v0.14.1
 
-### v0.12
+* Fixed issue that caused the API to reject requests.
 
-**The `ManageCart` class has been completely rewritten!**
-
-* __Breaking Changes__
-    * `ManageCart`
-        * The ManageCart class has been complely rewritten. See [README](README.md#managecart) for new API.
 ## License
 The MIT License (MIT)
 

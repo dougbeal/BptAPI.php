@@ -10,6 +10,7 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
     public function __construct()
     {
         $this->eventInfo = new EventInfo(getenv('DEVID'));
+        $this->eventInfo->setOption('logErrors', true);
     }
 
     public function testGetEvents()

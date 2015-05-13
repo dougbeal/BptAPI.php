@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.14.1
+
+* Fixed issue that caused the API to reject requests.
+
+## v0.14
+
+* `EventInfo->getPrices()` Now returns a password field and price order.
+
 ## v0.13.1
 
 * `ManageCart->initCart()` will now accept two arguments. `cartID` and `cartCreatedAt`.

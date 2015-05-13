@@ -204,6 +204,38 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($willCall, $this->bpt->getShipping());
     }
 
+    public function testInvalidCountries()
+    {
+        $prices = array(
+            3424567 => array(
+                'quantity' => 1,
+                'shippingMethod' => 2
+            ),
+            3424571 => array(
+                'quantity' => 3,
+                'shippingMethod' => 3
+            )
+        );
+
+        $willCall = array(
+            'firstName' => 'API',
+            'lastName' => 'Test',
+            'address' => '123 Street',
+            'city' => 'Seattle',
+            'state' => 'WA',
+            'zip' => '98122',
+            'country' => 'US'
+        );
+
+        $this->bpt->initCart();
+        $this->bpt->setPrices($prices);
+        $this->bpt->sendPrices();
+        $this->bpt->setShipping($willCall);
+        $shipping = $this->bpt->sendShipping();
+
+        print_r($shipping);
+    }
+
     public function testSendShipping()
     {
         $prices = array(
