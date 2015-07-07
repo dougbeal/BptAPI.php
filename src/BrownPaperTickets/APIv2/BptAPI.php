@@ -65,7 +65,12 @@ class BptAPI
      * @var boolean
      */
     private $logErrors = false;
+    private $logger;
 
+    /**
+     * With debug set to true, the library will log all requests and responses as they come in.
+     */
+    private $debug = false;
     /**
      * Set the Dev ID
      *
@@ -90,6 +95,14 @@ class BptAPI
 
             if (isset($params['logErrors'])) {
                 $this->logErrors = $params['logErrors'];
+            }
+
+            if (isset($params['debug'])) {
+                $this->debug = true;
+            }
+
+            if (isset($params['logger'])) {
+                $this->setLogger($logger);
             }
         }
     }
@@ -119,6 +132,10 @@ class BptAPI
         //$params = array_shift($apiOptions);
         $url = $this->baseURL.$endPoint.'?id='.$this->devID;
 
+        if ($this->debug) {
+            $this->setError('API Call', $url);
+        }
+
         foreach ($apiOptions as $key => $value) {
             $url = $url.'&'.$key.'='.urlencode($value);
         }
@@ -126,11 +143,14 @@ class BptAPI
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_SSLVERSION, 4);
         curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         $apiResponse = curl_exec($ch);
+
+        if ($this->debug) {
+            $this->setError('API Response', $apiResponse);
+        }
 
         curl_close($ch);
 
@@ -175,11 +195,12 @@ class BptAPI
     {
         $validOptions = array(
             'logErrors',
-            'devID'
+            'devID',
+            'debug'
         );
 
         if (!in_array($option, $validOptions)) {
-            $this->setError('setOption', 'Invalid option: '.$option);
+            $this->setError('setOption', 'Invalid option: ' . $option);
             return false;
         }
 
@@ -218,14 +239,21 @@ class BptAPI
      */
     public function setError($method, $description)
     {
-        if ($this->logErrors) {
+        if ($this->logErrors || $this->debug) {
+            $error = array($method => $description);
             $this->errors[] = array($method => $description);
 
             if (end($this->errors) === array($method => $description)) {
+
+                if ($this->logger) {
+                    $this->logger->debug($method . ': '. $description);
+                }
+
                 return true;
             } else {
                 return false;
             }
+
         } else {
             return null;
         }
@@ -357,5 +385,9 @@ class BptAPI
         } else {
             return 'f';
         }
+    }
+
+    public function setLogger(\Psr\Log\LoggerInterface $logger) {
+        return $this->logger = $logger;
     }
 }

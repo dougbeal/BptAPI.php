@@ -18,5 +18,11 @@
         "psr-0": {
             "BrownPaperTickets": ["src"]
         }
+    },
+    "require": {
+        "psr/log": "^1.0"
+    },
+    "require-dev": {
+        "monolog/monolog": "1.14.0"
     }
 }

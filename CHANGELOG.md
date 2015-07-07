@@ -1,4 +1,8 @@
 # Changelog
+## v0.15.0
+
+* Added ability to capture all requests sent to the API and the raw response. Add `'debug' => true` to the `options` arrays upon instantiation or use `setOption('debug', true)`.
+* Added `setLogger()` method that accepts a PSR-3 compatible logger (i.e. [Monolog](https://github.com/Seldaek/monolog)). You can also pass it in in the `options` array when instantiating.
 
 ## v0.14.2
 

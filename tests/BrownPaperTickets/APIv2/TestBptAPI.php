@@ -43,7 +43,7 @@ class BrownPaperTicketsClassTest extends \PHPUnit_Framework_TestCase
     {
         $this->bpt->getOption('something');
     }
-    
+
     public function testErrors()
     {
         $this->bpt->setError('someMethod', 'Some Error');
@@ -57,5 +57,43 @@ class BrownPaperTicketsClassTest extends \PHPUnit_Framework_TestCase
         $allErrors = $this->bpt->getErrors();
 
         $this->assertCount(3, $allErrors);
+    }
+
+    public function testSetLogger()
+    {
+        $logger = new \Monolog\Logger('test-logger');
+        $file = fopen('php://memory', 'rw');
+
+        $logger->pushHandler(new \Monolog\Handler\StreamHandler($file, $logger::DEBUG));
+
+        $this->assertInstanceOf('\Psr\Log\LoggerInterface', $this->bpt->setLogger($logger));
+    }
+
+    public function testSetDebug()
+    {
+        $this->bpt->setOption('debug', true);
+
+        $this->assertTrue($this->bpt->getOption('debug'));
+    }
+
+    public function testDebugLogging()
+    {
+        $logger = new \Monolog\Logger('test-logger');
+        $file = fopen('php://memory', 'rw');
+
+        $logger->pushHandler(new \Monolog\Handler\StreamHandler($file, $logger::DEBUG));
+
+        $event = new \BrownPaperTickets\APIv2\EventInfo(getenv('DEVID'), array(
+            'debug' => true
+        ));
+
+        $event->setLogger($logger);
+
+        $event->getEvents('chandler');
+
+        rewind($file);
+        $file = stream_get_contents($file);
+        $this->assertContains('API Call: ', $file);
+        $this->assertContains('API Response: ', $file);
     }
 }
