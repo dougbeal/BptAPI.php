@@ -102,7 +102,7 @@ class BptAPI
             }
 
             if (isset($params['logger'])) {
-                $this->setLogger($logger);
+                $this->setLogger($params['logger']);
             }
         }
     }
