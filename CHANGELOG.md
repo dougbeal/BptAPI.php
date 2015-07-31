@@ -1,4 +1,14 @@
 # Changelog
+
+## v0.15.2
+* Added .gitattributes to prevent tests and other crap from being downloaded with packagist.
+
+* __Breaking Changes__
+    * The ManageCart class no longer saves the credit card info to the object. You must now pass in the credit card info array to `MangeCart::sendBilling` method rather than `ManageCart::setBilling` as was done before.
+
+## v0.15.1
+* Fixed `__construct` logger option
+
 ## v0.15.0
 
 * Added ability to capture all requests sent to the API and the raw response. Add `'debug' => true` to the `options` arrays upon instantiation or use `setOption('debug', true)`.

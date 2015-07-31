@@ -72,7 +72,6 @@ class ManageCart extends BptAPI
     {
 
         if ($cartID) {
-
             $this->cartID = $cartID;
             $this->cartCreatedAt = $createdAt;
 
@@ -238,7 +237,6 @@ class ManageCart extends BptAPI
 
         foreach ($prices as $price) {
             if (isset($modifiedPrices[$price])) {
-
                 $modifiedPrices[$price]['quantity'] = 0;
 
             }
@@ -247,6 +245,11 @@ class ManageCart extends BptAPI
         $this->prices = $modifiedPrices;
 
         return $this->prices;
+    }
+
+    public function clearPricesNotAdded()
+    {
+        $this->pricesNotAdded = array();
     }
 
     public function getPricesNotAdded()
@@ -292,9 +295,9 @@ class ManageCart extends BptAPI
         }
 
         $newPrices = array();
+        $this->clearPricesNotAdded();
 
         foreach ($this->getPrices() as $priceID => $values) {
-
             $apiOptions['price_id'] = $priceID;
             $apiOptions['shipping'] = $values['shippingMethod'];
             $apiOptions['quantity'] = $values['quantity'];
@@ -450,20 +453,6 @@ class ManageCart extends BptAPI
             if (!isset($billingInfo['email']) || !isset($billingInfo['phone'])) {
                 return array('success' => false, 'message' => 'Email and telephone are required.');
             }
-
-            if (!isset($billingInfo['type']) ||
-                !isset($billingInfo['number']) ||
-                !isset($billingInfo['expMonth']) ||
-                !isset($billingInfo['expYear']) ||
-                !isset($billingInfo['cvv2'])
-            ) {
-                return array('success' => false, 'message' => 'Credit card info is required.');
-            }
-
-
-            if (!in_array($billingInfo['type'], $this->allowedCardTypes)) {
-                return array('success' => false, 'message' => 'Type must be Visa, Mastercard, Discover or Amex.');
-            }
         }
 
         $this->billingInfo = $billingInfo;
@@ -473,11 +462,14 @@ class ManageCart extends BptAPI
     }
 
     /**
-     * Add billing info to the cart.
-     * @param array $params The billing info.
+     * Send billing info to the API. If the cart's value isn't zero, you must pass
+     * a CC info array.
+     * @param array $cc The credit card info.
      *
+     * @return mixed Upon success, you'll receive a receipt array.
+     * If it fails, an array with a success bool and a message.
      */
-    public function sendBilling()
+    public function sendBilling(Array $cc = null)
     {
 
         if ($this->getReceipt()) {
@@ -536,12 +528,25 @@ class ManageCart extends BptAPI
             'billing_lname' => $this->billingInfo['lastName'],
         );
 
-        if ($this->requireFullBilling) {
-            $apiOptions['type'] = $this->billingInfo['type'];
-            $apiOptions['number'] = $this->billingInfo['number'];
-            $apiOptions['exp_month'] = $this->billingInfo['expMonth'];
-            $apiOptions['exp_year'] = $this->billingInfo['expYear'];
-            $apiOptions['cvv2'] = $this->billingInfo['cvv2'];
+        if ($this->getRequireFullBilling()) {
+            if (!isset($cc['type']) ||
+                !isset($cc['number']) ||
+                !isset($cc['expMonth']) ||
+                !isset($cc['expYear']) ||
+                !isset($cc['cvv2'])
+            ) {
+                return array('success' => false, 'message' => 'Credit card info is required.');
+            }
+
+            if (!in_array($cc['type'], $this->allowedCardTypes)) {
+                return array('success' => false, 'message' => 'Type must be Visa, Mastercard, Discover or Amex.');
+            }
+
+            $apiOptions['type'] = $cc['type'];
+            $apiOptions['number'] = $cc['number'];
+            $apiOptions['exp_month'] = $cc['expMonth'];
+            $apiOptions['exp_year'] = $cc['expYear'];
+            $apiOptions['cvv2'] = $cc['cvv2'];
             $apiOptions['billing_address'] = $this->billingInfo['address'];
             $apiOptions['billing_city'] = $this->billingInfo['city'];
             $apiOptions['billing_state'] = $this->billingInfo['state'];
@@ -552,6 +557,7 @@ class ManageCart extends BptAPI
         }
 
         $billingInfoXML = $this->parseXML($this->callAPI($apiOptions));
+
         if (isset($billingInfoXML['error'])) {
              return array('success' => false, 'message' => $billingInfoXML['error']);
         }
@@ -561,7 +567,7 @@ class ManageCart extends BptAPI
             'message' => 'Purchase complete.',
         );
 
-        if ($billingInfoXML->pahurl) {
+        if (isset($billingInfoXML->pahurl)) {
             $results['pahurl'] = (string) $billingInfoXML->pahurl;
         }
 

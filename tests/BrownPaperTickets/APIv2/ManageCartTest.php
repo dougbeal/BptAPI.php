@@ -285,10 +285,6 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
         );
 
         $billing = array(
-            'number' => '1234567890000000',
-            'expMonth' => 10,
-            'expYear' => 2018,
-            'cvv2' => 666,
             'firstName' => 'API',
             'lastName' => 'Test',
             'address' => '123 Street',
@@ -328,19 +324,8 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
 
         $billing['email'] = 'someone@somewhere.com';
         $billing['phone'] = '800.838.3006';
-        $false = $this->bpt->setBilling($billing);
 
-        $this->assertFalse($false['success']);
-        $this->assertEquals('Credit card info is required.', $false['message']);
-
-        $billing['type'] = 'BITCOINZZZZ';
-        $false = $this->bpt->setBilling($billing);
-
-        $this->assertEquals('Type must be Visa, Mastercard, Discover or Amex.', $false['message']);
-
-        $billing['type'] = 'Visa';
         $true = $this->bpt->setBilling($billing);
-
         $this->assertEquals('Billing info set.', $true['message']);
         $this->assertTrue($true['success']);
 
@@ -372,11 +357,6 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
         );
 
         $billing = array(
-            'type' => 'Visa',
-            'number' => '1234567890000000',
-            'expMonth' => 10,
-            'expYear' => 2018,
-            'cvv2' => 666,
             'firstName' => 'API',
             'lastName' => 'Test',
             'address' => '123 Street',
@@ -419,14 +399,31 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($noBilling['success']);
         $this->assertEquals('No billing info set.', $noBilling['message']);
 
-        $setBilling = $this->bpt->setBilling($billing);
+        $this->bpt->setBilling($billing);
+        $noCC = $this->bpt->sendBilling();
+        $this->assertFalse($noCC['success']);
+        $this->assertEquals('Credit card info is required.', $noCC['message']);
 
-        $success = $this->bpt->sendBilling();
+        $cc = array(
+            'type' => 'BITCOINZZZZ',
+            'number' => '1234567890000000',
+            'expMonth' => 10,
+            'expYear' => 2018,
+            'cvv2' => 666,
+        );
+
+        $invalidCCType = $this->bpt->sendBilling($cc);
+
+        $this->assertEquals('Type must be Visa, Mastercard, Discover or Amex.', $invalidCCType['message']);
+
+        $cc['type'] = 'Visa';
+
+        $success = $this->bpt->sendBilling($cc);
 
         $this->assertTrue($success['success']);
         $this->assertEquals('Purchase complete.', $success['message']);
 
-        $alreadySent = $this->bpt->sendBilling();
+        $alreadySent = $this->bpt->sendBilling($cc);
         $this->assertFalse($alreadySent['success']);
         $this->assertEquals('Billing info has already been sent.', $alreadySent['message']);
 

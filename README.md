@@ -165,7 +165,7 @@ with the following fields:
 | `quantity` | integer | the number of tickets you wish to add. |
 | `affiliateID` | integer | Optional. If you wish to earn a commision, add the affiliate ID. |
 
-*Shipping Methods 1 for Physical, 2 for Will Call, 3 for Print at Home.
+* Shipping Methods 1 for Physical, 2 for Will Call, 3 for Print at Home.
 
 ```php
 $prices = array(
@@ -204,7 +204,7 @@ Note: When the class sets the value, it will determine whether or not certain fi
 Pass in an array of shipping information.
 
 | field | notes |
-|-------|-------|
+|------|-------|
 | firstName | |
 | lastName | |
 | address | |
@@ -226,7 +226,7 @@ Always pass these fields:
 | firstName | |
 | lastName | |
 
-When the cart's value is greather than 0, you must also include the following fields. If you do not, then the cart will return the results array with the message ""
+When the cart's value is greater than 0, you must also include the following fields. If you do not, then the cart will return the results array with the message ""
 
 | field | notes |
 |-------|-------|
@@ -238,18 +238,24 @@ When the cart's value is greather than 0, you must also include the following fi
 | email | |
 | phone | |
 | country | Values include "United States" and "Canada". |
+
+Returns a results array.
+
+#### sendBilling(Array $ccInfo)
+Sends the billing information to the cart.
+
+When the cart's value is greater than 0, you must include the cc info array:
+
+| field | notes |
+|-------|-------|
 | type | Credit card type. Must be "Visa", "Mastercard", "Discover" or "Amex" |
 | number | Credit card number. Must be a string |
 | expMonth | Expiration month. |
 | expYear | Expriration year. |
 | cvv2 | Credit card verification code |
 
-Returns a results array.
-
-#### sendBilling()
-Sends the billing information to the cart.
-
 Once this has been called and is successful, you will no longer be able to `sendPrices()`, `sendShipping()` or `sendBilling()`.
+
 
 Returns a results array with the following fields:
 
@@ -270,6 +276,16 @@ Documentation Coming (View Source!)
 ## Latest Changes
 
 (See [CHANGELOG](CHANGELOG.md) for full set of changes)
+
+## v0.15.2
+* Added .gitattributes to prevent tests and other crap from being downloaded with packagist.
+
+* __Breaking Changes__
+    * The ManageCart class no longer saves the credit card info to the object. You must now pass in the credit card info array to `MangeCart::sendBilling` method rather than `ManageCart::setBilling` as was done before.
+
+## v0.15.1
+* Fixed `__construct` logger option
+
 ### v0.15.0
 
 * Added ability to capture all requests sent to the API and the raw response. Add `'debug' => true` to the `options` arrays upon instantiation or use `setOption('debug', true)`.
@@ -278,10 +294,6 @@ Documentation Coming (View Source!)
 ### v0.14.2
 
 * Fixed issue with the order field in getPrices.
-
-### v0.14.1
-
-* Fixed issue that caused the API to reject requests.
 
 ## License
 The MIT License (MIT)
