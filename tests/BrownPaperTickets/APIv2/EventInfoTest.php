@@ -17,7 +17,7 @@ class BrownPaperTicketsGetEventInfoTest extends \PHPUnit_Framework_TestCase
     {
         $events = $this->eventInfo->getEvents('chandler', null, true, true);
 
-        $this->assertCount(5, $events);
+        $this->assertCount(6, $events);
 
         foreach ($events as $event) {
             // Test that we get the proper fields back

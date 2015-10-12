@@ -259,15 +259,18 @@ class EventInfo extends BptAPI
         $xml = $this->parseXML($apiResponse);
 
         if (isset($xml->channel->item->title) && $xml->channel->item->title == 'Error') {
-
             $this->setError('getImages', (string) $xml->channel->item->description);
             return false;
+        }
+
+        if (!isset($xml->channel->item)) {
+            $this->setError('getImages', 'No images found.');
+            return null;
         }
 
         $images = array();
 
         foreach ($xml->channel->item as $item) {
-
             $bpt = $item->children('http://www.brownpapertickets.com/bpt.html');
 
             $image = array(
@@ -277,12 +280,6 @@ class EventInfo extends BptAPI
             );
 
             $images[] = $image;
-
-        }
-
-        if (!$images) {
-            $this->setError('getImages', 'No images found.');
-            return null;
         }
 
         return $images;

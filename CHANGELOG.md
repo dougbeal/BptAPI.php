@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.15.3
+* Fixed issue in `getImages` method.
+
 ## v0.15.2
 * Added .gitattributes to prevent tests and other crap from being downloaded with packagist.
 

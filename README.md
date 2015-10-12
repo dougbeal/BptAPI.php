@@ -277,6 +277,9 @@ Documentation Coming (View Source!)
 
 (See [CHANGELOG](CHANGELOG.md) for full set of changes)
 
+## v0.15.3
+* Fixed issue in `getImages` method.
+
 ## v0.15.2
 * Added .gitattributes to prevent tests and other crap from being downloaded with packagist.
 
@@ -291,9 +294,6 @@ Documentation Coming (View Source!)
 * Added ability to capture all requests sent to the API and the raw response. Add `'debug' => true` to the `options` arrays upon instantiation or use `setOption('debug', true)`.
 * Added `setLogger()` method that accepts a PSR-3 compatible logger (i.e. [Monolog](https://github.com/Seldaek/monolog)). You can also pass it in in the `options` array when instantiating.
 
-### v0.14.2
-
-* Fixed issue with the order field in getPrices.
 
 ## License
 The MIT License (MIT)
