@@ -1,19 +1,19 @@
 <?php
 
-namespace BrownPaperTickets\APIv2;
+namespace BrownPaperTicketsTests\APIv2;
 
-use PHPUnit_Framework_TestCase;
+use BrownPaperTickets\APIv2\CartInfo;
 
-class BrownPaperTicketsGetCartContentsTest extends \PHPUnit_Framework_TestCase
+class CartInfoTest extends ApiCase
 {
 
     protected $bpt;
     protected $cartID;
 
-    public function __construct()
+    public function setUp()
     {
-        $this->bpt = new CartInfo(getenv('DEVID'));
-
+        parent::setUp();
+        $this->bpt = new CartInfo($this->getApiKey());
     }
 
     public function testGetCartContents()
@@ -49,6 +49,6 @@ class BrownPaperTicketsGetCartContentsTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('0.00', $cartValue['cartValue']);
         $this->assertEquals('USD', $cartValue['cartCurrency']);
-        $this->assertEquals(false, $cartValue['shippingNeeded']);
+        $this->assertEquals(true, $cartValue['shippingNeeded']);
     }
 }

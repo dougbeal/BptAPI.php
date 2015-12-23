@@ -1,17 +1,18 @@
 <?php
 
-namespace BrownPaperTickets\APIv2;
+namespace BrownPaperTicketsTests\APIv2;
 
-use PHPUnit_Framework_TestCase;
+use BrownPaperTickets\APIv2\ManageEvent;
 
-class BrownPaperTicketsCreateEventTest extends \PHPUnit_Framework_TestCase
+class ManageEventTest extends ApiCase
 {
 
     public $bpt = null;
 
     public function __construct()
     {
-        $this->bpt = new ManageEvent(getenv('DEVID'));
+        parent::setUp();
+        $this->bpt = new ManageEvent($this->getApiKey());
         $this->bpt->setOption('logErrors', true);
     }
 
@@ -137,7 +138,7 @@ class BrownPaperTicketsCreateEventTest extends \PHPUnit_Framework_TestCase
             'contactAddress2' => '',
             'contactCity' => 'Boston',
             'contactState' => 'MA',
-            'contactZip' =>  01950,
+            'contactZip' =>  "01950",
             'contactCountry' => 'US',
             //'activated' => 'f'
         );

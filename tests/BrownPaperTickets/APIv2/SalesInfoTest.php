@@ -1,15 +1,14 @@
 <?php
 
-namespace BrownPaperTickets\APIv2;
+namespace BrownPaperTicketsTests\APIv2;
 
-//use BrownPaperTickets\APIv2\eventInfo;
-use PHPUnit_Framework_TestCase;
+use BrownPaperTickets\APIv2\SalesInfo;
 
-class BrownPaperTicketsGetSalesInfoTest extends \PHPUnit_Framework_TestCase
+class SalesInfoTest extends ApiCase
 {
     public function __construct()
     {
-        $this->salesInfo = new SalesInfo(getenv('DEVID'));
+        $this->salesInfo = new SalesInfo($this->getApiKey());
     }
 
     public function testGetEventSales()

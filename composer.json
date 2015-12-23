@@ -15,14 +15,17 @@
         }
     ],
     "autoload": {
-        "psr-0": {
-            "BrownPaperTickets": ["src"]
+        "psr-4": {
+            "BrownPaperTickets\\": "src/BrownPaperTickets/",
+            "BrownPaperTicketsTests\\": "tests/BrownPaperTickets/"
         }
     },
     "require": {
         "psr/log": "^1.0"
     },
     "require-dev": {
-        "monolog/monolog": "1.14.0"
+        "monolog/monolog": "1.14.0",
+        "phpunit/phpunit": "@stable",
+        "symfony/var-dumper": "@stable"
     }
 }

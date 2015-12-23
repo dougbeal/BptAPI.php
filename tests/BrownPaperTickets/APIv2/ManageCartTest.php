@@ -1,10 +1,10 @@
 <?php
 
-namespace BrownPaperTickets\APIv2;
+namespace BrownPaperTicketsTests\APIv2;
 
-use PHPUnit_Framework_TestCase;
+use BrownPaperTickets\APIv2\ManageCart;
 
-class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
+class ManageCartTest extends ApiCase
 {
 
     /**
@@ -16,7 +16,8 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
 
     public function __construct()
     {
-        $this->bpt = new ManageCart(getenv('DEVID'));
+        parent::setUp();
+        $this->bpt = new ManageCart($this->getApiKey());
     }
 
     public function testGetCartId()
@@ -232,8 +233,6 @@ class BrownPaperTicketsSubmitOrderTest extends \PHPUnit_Framework_TestCase
         $this->bpt->sendPrices();
         $this->bpt->setShipping($willCall);
         $shipping = $this->bpt->sendShipping();
-
-        print_r($shipping);
     }
 
     public function testSendShipping()

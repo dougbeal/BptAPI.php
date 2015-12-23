@@ -1,10 +1,11 @@
 <?php
 
-namespace BrownPaperTickets\APIv2;
+namespace BrownPaperTicketsTests\APIv2;
 
+use BrownPaperTickets\APIv2\BptAPI;
 use PHPUnit_Framework_TestCase;
 
-class BrownPaperTicketsClassTest extends \PHPUnit_Framework_TestCase
+class ApiTest extends \PHPUnit_Framework_TestCase
 {
     public $bpt = null;
 
