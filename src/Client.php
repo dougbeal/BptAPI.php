@@ -2,6 +2,9 @@
 
 namespace BrownPaperTickets;
 
+use Psr\Log\LoggerInterface;
+use Symfony\Component\VarDumper\VarDumper;
+
 class Client
 {
     /**
@@ -15,6 +18,11 @@ class Client
      * @var string
      */
     private $apiKey;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     public function __construct($configurations = [])
     {
@@ -31,26 +39,12 @@ class Client
      */
     public function call($endpoint, $params = [])
     {
+        $url = $this->buildUrl($endpoint, $params);
+        $ch = $this->initCurl($url);
 
-        //$params = array_shift($apiOptions);
-        $url = sprintf('%s%s?id=%s', $this->baseUrl, $endpoint, $this->apiKey);
-        // $url = $this->baseURL.$endPoint.'?id='.$this->devID;
-
-        // $this->setError('API Call', $url);
-
-        foreach ($params as $key => $value) {
-            $url = $url.'&'.$key.'='.urlencode($value);
-        }
-
-        $ch = curl_init();
-
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HEADER, false);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
+        $this->logger->debug(sprintf('API Call : %s', $url));
         $apiResponse = curl_exec($ch);
-
-        // $this->setError('API Response', $apiResponse);
+        $this->logger->debug('API Response : %s', $apiResponse);
 
         curl_close($ch);
 
@@ -62,7 +56,55 @@ class Client
      */
     protected function configure(array $configurations)
     {
-        $this->baseUrl = (isset($configurations['base_url'])) ? : $configurations['base_url'];
-        $this->apiKey = (isset($configurations['api_key'])) ? : $configurations['api_key'];
+        $this->baseUrl = (isset($configurations['base_url'])) ? $configurations['base_url'] : $this->baseUrl;
+        $this->apiKey = (isset($configurations['api_key'])) ? $configurations['api_key'] : $this->apiKey;
+    }
+
+    /**
+     * Formats the url to call
+     *
+     * @param $endpoint
+     * @param $params
+     * @return string
+     */
+    protected function buildUrl($endpoint, $params)
+    {
+        $params['id'] = $this->apiKey;
+
+        $urlParams = [];
+        foreach ($params as $key => $value) {
+            $urlParams[] = sprintf('%s=%s', $key, urlencode($value));
+        }
+
+        $url = $this->baseUrl . $endpoint . '?' . implode('&', $urlParams);
+
+        return $url;
+    }
+
+    public function setLogger(LoggerInterface $logger = null)
+    {
+        $this->logger = $logger;
+    }
+
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
+     * Initialize curl for an api call
+     *
+     * @param $url
+     * @return resource
+     */
+    protected function initCurl($url)
+    {
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        return $ch;
     }
 }

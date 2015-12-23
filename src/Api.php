@@ -24,18 +24,10 @@ class Api
      */
     private $logger;
 
-    /**
-     * Retreives a fully configured client instance base on configurations
-     */
-    public static function instance()
-    {
-        return new static(new Client(), new Logger());
-    }
-
-    public function __construct(Client $client = null, LoggerInterface $logger = null)
+    public function __construct(Client $client = null)
     {
         $this->setClient($client);
-        $this->setLogger($logger);
+        $this->setLogger($client->getLogger());
     }
 
     /**

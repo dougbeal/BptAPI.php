@@ -13,7 +13,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $configurations = require('config/api.php');
 
-        $api = new Api(new Client($configurations));
+        $client = new Client($configurations);
+        $logger = new Logger("BPT");
+        $client->setLogger($logger);
+
+        $api = new Api($client);
 
         $response = $api->call('eventlist', [
             'event_id'  => '153529'

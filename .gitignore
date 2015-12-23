@@ -2,5 +2,7 @@ vendor
 composer.lock
 docs
 
+config/api.php
+
 #phpstorm
 .idea/*
