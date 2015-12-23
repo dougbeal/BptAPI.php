@@ -16,8 +16,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "BrownPaperTickets\\": "src/BrownPaperTickets/",
-            "BrownPaperTicketsTests\\": "tests/BrownPaperTickets/"
+            "BrownPaperTickets\\": "src/",
+            "BrownPaperTicketsTests\\": "tests/"
         }
     },
     "require": {

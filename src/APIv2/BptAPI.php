@@ -52,7 +52,7 @@ class BptAPI
      * The base URL used to make API calls.
      * @var string
      */
-    private $baseURL = 'https://www.brownpapertickets.com/api2/';
+    private $baseURL;
 
     /**
      * An array of errors.
@@ -206,11 +206,7 @@ class BptAPI
 
         $this->$option = $value;
 
-        if ($this->$option === $value) {
-            return true;
-        } else {
-            return false;
-        }
+        return true;
     }
 
     /**
@@ -221,11 +217,11 @@ class BptAPI
      */
     public function getOption($option)
     {
-        if (isset($this->$option)) {
-            return $this->$option;
-        } else {
-            throw new \Exception($option.' does not exist.');
+        if (false === isset($this->$option)) {
+            throw new \Exception($option . ' does not exist.');
         }
+
+        return $this->$option;
     }
 
     /**
@@ -250,20 +246,20 @@ class BptAPI
                 }
 
                 return true;
-            } else {
-                return false;
             }
 
-        } else {
-            return null;
+            return false;
         }
+
+        return null;
     }
 
     /**
      * Get the errors.
+     * 
      * @param  string $newest Pass in `'newest'` to return the most recent error.
      * Otherwise returns all.
-     *
+     * 
      * @return array An array of errors.
      */
     public function getErrors($newest = null)
@@ -275,13 +271,14 @@ class BptAPI
 
             return array_reverse($this->errors);
         }
+
+        return [];
     }
 
     /**
      * parse the XML file
      *
      * @param string $rawXML the XML string to parse
-     *
      * @return object $xmlTree A parsed XML object
      */
     protected function parseXML($rawXML)
@@ -290,9 +287,7 @@ class BptAPI
         libxml_use_internal_errors(true);
 
         try {
-
             $xmlTree = new SimpleXMLElement($rawXML);
-
         } catch (\Exception $exception) {
             // Something went wrong.
 
@@ -303,18 +298,13 @@ class BptAPI
             );
 
             return $this->handleError($data);
-
         }
 
         if ($xmlTree->result == 'fail') {
-
             return $this->handleError($xmlTree);
-
         }
 
         return $xmlTree;
-
-
     }
 
     /**
@@ -365,11 +355,7 @@ class BptAPI
      */
     protected function convertToBool($value)
     {
-        if ($value == 'n') {
-            return false;
-        } else {
-            return true;
-        }
+        return ($value !== 'n');
     }
 
     /**
@@ -380,11 +366,7 @@ class BptAPI
      */
     protected function convertBoolToString($value)
     {
-        if ($value) {
-            return 't';
-        } else {
-            return 'f';
-        }
+        return ($value) ? 't' : 'f';
     }
 
     public function setLogger(\Psr\Log\LoggerInterface $logger) {

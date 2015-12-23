@@ -2,30 +2,30 @@
 <phpunit 
     bootstrap="./vendor/autoload.php"
     colors="true"
-    stopOnFailure="true"
-    stopOnError="true"
+    stopOnFailure="false"
+    stopOnError="false"
     verbose="true"
 >
     <testsuites>
         <testsuite name="all">
-            <directory>tests/BrownPaperTickets</directory>
+            <directory>tests/</directory>
         </testsuite>
         <testsuite name="get">
-            <directory>tests/BrownPaperTickets/Get/</directory>
+            <directory>tests/Get/</directory>
         </testsuite>
         <testsuite name="create">
-            <directory>tests/BrownPaperTickets/Create/</directory>
+            <directory>tests/Create/</directory>
         </testsuite>
         <testsuite name="error">
-            <directory>tests/BrownPaperTickets/Errors/</directory>
+            <directory>tests/Errors/</directory>
         </testsuite>
         <testsuite name="submit">
-            <directory>tests/BrownPaperTickets/Order/</directory>
+            <directory>tests/Order/</directory>
         </testsuite>
     </testsuites>
     <filter>
         <whitelist>
-            <directory suffix=".php">src/BrownPaperTickets</directory>
+            <directory suffix=".php">src/</directory>
         </whitelist>
     </filter>
 </phpunit>

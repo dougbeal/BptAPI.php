@@ -81,6 +81,7 @@ class ManageEventTest extends ApiCase
 
     public function testChangeEvent()
     {
+        $this->markTestSkipped("Can't add an authorized account through the web site, so this part is untestable for me [lunfel]");
         $this->bpt = $this->bpt;
 
         $originalEventParams = array(
