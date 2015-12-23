@@ -4,7 +4,7 @@ namespace BrownPaperTicketsTests;
 
 use BrownPaperTickets\Api;
 use BrownPaperTickets\Client;
-use Monolog\Logger;
+use BrownPaperTickets\Logger\VoidLogger;
 use Symfony\Component\VarDumper\VarDumper;
 
 class ClientTest extends \PHPUnit_Framework_TestCase
@@ -14,7 +14,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $configurations = require('config/api.php');
 
         $client = new Client($configurations);
-        $logger = new Logger("BPT");
+        $logger = new VoidLogger();
         $client->setLogger($logger);
 
         $api = new Api($client);

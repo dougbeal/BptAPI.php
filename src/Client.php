@@ -44,7 +44,7 @@ class Client
 
         $this->logger->debug(sprintf('API Call : %s', $url));
         $apiResponse = curl_exec($ch);
-        $this->logger->debug('API Response : %s', $apiResponse);
+        $this->logger->debug(sprintf('API Response : %s', $apiResponse));
 
         curl_close($ch);
 
