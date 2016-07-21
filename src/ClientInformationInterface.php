@@ -11,5 +11,6 @@ namespace BrownPaperTickets;
 interface ClientInformationInterface
 {
     public function getAccountInformation();
-    
+    public function getSubAccountInformation();
+    public function getPrinterList();
 }

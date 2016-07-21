@@ -2,6 +2,7 @@
 
 namespace BrownPaperTickets;
 
+use BrownPaperTickets\APIv2\Request\Request;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\VarDumper\VarDumper;
 
@@ -37,9 +38,10 @@ class Client
      *
      * @return object The xml returned by the API
      */
-    public function call($endpoint, $params = [])
+    public function call(Request $request, $params = [])
     {
-        $url = $this->buildUrl($endpoint, $params);
+        $url = $this->buildUrl($request);
+        
         $ch = $this->initCurl($url);
 
         $this->logger->debug(sprintf('API Call : %s', $url));
@@ -58,27 +60,6 @@ class Client
     {
         $this->baseUrl = (isset($configurations['base_url'])) ? $configurations['base_url'] : $this->baseUrl;
         $this->apiKey = (isset($configurations['api_key'])) ? $configurations['api_key'] : $this->apiKey;
-    }
-
-    /**
-     * Formats the url to call
-     *
-     * @param $endpoint
-     * @param $params
-     * @return string
-     */
-    protected function buildUrl($endpoint, $params)
-    {
-        $params['id'] = $this->apiKey;
-
-        $urlParams = [];
-        foreach ($params as $key => $value) {
-            $urlParams[] = sprintf('%s=%s', $key, urlencode($value));
-        }
-
-        $url = $this->baseUrl . $endpoint . '?' . implode('&', $urlParams);
-
-        return $url;
     }
 
     public function setLogger(LoggerInterface $logger = null)
@@ -106,5 +87,25 @@ class Client
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         return $ch;
+    }
+
+    /**
+     * Formats the url to call
+     *
+     * @param Request $request
+     * @return string
+     */
+    protected function buildUrl(Request $request)
+    {
+        $params = $request->getParams();
+        $params['id'] = $this->apiKey;
+
+        $urlParams = [];
+        foreach ($params as $key => $value) {
+            $urlParams[] = sprintf('%s=%s', $key, urlencode($value));
+        }
+
+        $url = $this->baseUrl . $request->getEndpoint() . '?' . implode('&', $urlParams);
+        return $url;
     }
 }

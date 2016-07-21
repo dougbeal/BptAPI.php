@@ -8,6 +8,7 @@
 
 namespace BrownPaperTickets;
 
+use BrownPaperTickets\APIv2\Request\Request;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 
@@ -50,10 +51,10 @@ class Api
         $this->logger = $logger;
     }
 
-    public function call($endpoint, $params = [])
+    public function call(Request $request, $params = [])
     {
         if (null !== $this->client) {
-            return $this->client->call($endpoint, $params);
+            return $this->client->call($request, $params);
         }
 
         return null;

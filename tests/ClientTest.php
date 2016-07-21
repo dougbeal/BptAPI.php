@@ -3,6 +3,7 @@
 namespace BrownPaperTicketsTests;
 
 use BrownPaperTickets\Api;
+use BrownPaperTickets\APIv2\Request\EventInformation\EventListRequest;
 use BrownPaperTickets\Client;
 use BrownPaperTickets\Logger\VoidLogger;
 use Symfony\Component\VarDumper\VarDumper;
@@ -19,10 +20,12 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $api = new Api($client);
 
-        $response = $api->call('eventlist', [
-            'event_id'  => '153529'
+        $request = new EventListRequest([
+            'event_id'  => '2426491'
         ]);
 
-        VarDumper::dump($response);
+        $response = $api->call($request);
+
+
     }
 }
